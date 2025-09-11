@@ -63,7 +63,7 @@ df_filtered = df.copy()
 if selected_player != "All":
     df_filtered = df_filtered[df_filtered["full_name"] == selected_player]
 if selected_metric and "All" not in selected_metric:
-    df_filtered = df_filtered[df_filtered["metric_type"].isin(selected_metric)]
+    df_filtered = df_filtered[df_filtered["Metric_Type"].isin(selected_metric)]
 if selected_team != "All":
     df_filtered = df_filtered[df_filtered["team"] == selected_team]
 
@@ -89,12 +89,12 @@ with tab1:
         lower_is_better_metrics = ["10 yard sprint", "Pro Agility", "Home to 1B sprint"]
 
         if selected_metric == "All":
-            metrics_to_use = df_filtered["metric_type"].unique().tolist()
+            metrics_to_use = df_filtered["Metric_Type"].unique().tolist()
         else:
             metrics_to_use = selected_metric if isinstance(selected_metric, list) else [selected_metric]
 
         for metric in metrics_to_use:
-            df_metric = df_filtered[df_filtered["metric_type"] == metric]
+            df_metric = df_filtered[df_filtered["Metric_Type"] == metric]
 
             if not df_metric.empty:
                 st.markdown(f"### 📌 {metric}")
@@ -156,7 +156,7 @@ with tab1:
         player_age = df_filtered["Age"].iloc[0] if selected_player != "All" else df_filtered["Age"].mean()
         age_group = get_age_group(player_age)
         age_targets = targets.get(age_group, {})
-        metric_types_in_data = df_filtered["metric_type"].unique()
+        metric_types_in_data = df_filtered["Metric_Type"].unique()
         gauge_metrics = [m for m in metric_types_in_data if m in age_targets]
 
         if gauge_metrics:
@@ -166,7 +166,7 @@ with tab1:
             row_idx, col_idx = 0, 0
 
             for metric in gauge_metrics:
-                current_value = df_filtered[df_filtered["metric_type"]==metric]["average"].iloc[-1] if selected_player!="All" else df_filtered[df_filtered["metric_type"]==metric]["average"].mean()
+                current_value = df_filtered[df_filtered["Metric_Type"]==metric]["average"].iloc[-1] if selected_player!="All" else df_filtered[df_filtered["metric_type"]==metric]["average"].mean()
                 target_value = age_targets[metric]
                 if metric in lower_is_better:
                     delta_reference = target_value
@@ -214,13 +214,13 @@ with tab1:
 with tab2:
     st.subheader("🏆 Leaderboard")
 
-    all_metrics = sorted(df["metric_type"].dropna().unique())
+    all_metrics = sorted(df["Metric_Type"].dropna().unique())
     leaderboard_metric = st.selectbox("Select Metric for Leaderboard", all_metrics)
 
     top_n = st.slider("Select number of top players to display", min_value=3, max_value=20, value=10, step=1)
 
     if leaderboard_metric:
-        df_leader = df[df["metric_type"]==leaderboard_metric].copy()
+        df_leader = df[df["Metric_Type"]==leaderboard_metric].copy()
         lower_is_better_metrics = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
         is_lower_better = leaderboard_metric in lower_is_better_metrics
 
