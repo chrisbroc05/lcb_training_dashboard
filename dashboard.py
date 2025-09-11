@@ -37,7 +37,7 @@ def load_data():
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
     # Create full name column
-    df["full_name"] = df["first_name"].fillna('') + " " + df["last_name"].fillna('')
+    df["full_name"] = df["Player_name_first"].fillna('') + " " + df["Player_name_last"].fillna('')
 
     return df
 
