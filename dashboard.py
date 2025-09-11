@@ -52,7 +52,7 @@ st.sidebar.header("Filter Data")
 players = sorted(df["full_name"].dropna().unique())
 selected_player = st.sidebar.selectbox("Select Player", ["All"] + players)
 
-metric_types = sorted(df["metric_type"].dropna().unique())
+metric_types = sorted(df["Metric_Type"].dropna().unique())
 selected_metric = st.sidebar.multiselect("Select Metric Type", ["All"] + metric_types)
 
 teams = sorted(df["team"].dropna().unique())
@@ -85,7 +85,7 @@ with tab1:
 
     # Summary Metrics Cards
     if not df_filtered.empty:
-        total_sessions = df_filtered["date"].nunique()
+        total_sessions = df_filtered["Date"].nunique()
         lower_is_better_metrics = ["10 yard sprint", "Pro Agility", "Home to 1B sprint"]
 
         if selected_metric == "All":
