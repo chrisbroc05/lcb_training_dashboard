@@ -166,7 +166,7 @@ with tab1:
             row_idx, col_idx = 0, 0
 
             for metric in gauge_metrics:
-                current_value = df_filtered[df_filtered["Metric_Type"]==metric]["average"].iloc[-1] if selected_player!="All" else df_filtered[df_filtered["metric_type"]==metric]["average"].mean()
+                current_value = df_filtered[df_filtered["Metric_Type"]==metric]["average"].iloc[-1] if selected_player!="All" else df_filtered[df_filtered["Metric_Type"]==metric]["average"].mean()
                 target_value = age_targets[metric]
                 if metric in lower_is_better:
                     delta_reference = target_value
