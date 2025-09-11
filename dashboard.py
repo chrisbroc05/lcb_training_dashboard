@@ -55,7 +55,7 @@ selected_player = st.sidebar.selectbox("Select Player", ["All"] + players)
 metric_types = sorted(df["Metric_Type"].dropna().unique())
 selected_metric = st.sidebar.multiselect("Select Metric Type", ["All"] + metric_types)
 
-teams = sorted(df["team"].dropna().unique())
+teams = sorted(df["Team"].dropna().unique())
 selected_team = st.sidebar.selectbox("Select Team", ["All"] + teams)
 
 # Apply filters
