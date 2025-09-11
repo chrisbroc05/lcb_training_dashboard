@@ -21,20 +21,20 @@ def load_data():
 
     # Open spreadsheet and worksheet
     spreadsheet = client.open("LCBTraining Data")
-    worksheet = spreadsheet.worksheet("Data")  # Replace with your sheet name
+    worksheet = spreadsheet.worksheet("Data")
     data = worksheet.get_all_records()
 
     df = pd.DataFrame(data)
 
     # Convert numeric columns
-    numeric_cols = ["attempt_1", "attempt_2", "attempt_3", "last_attempt", "average", "highest", "lowest"]
+    numeric_cols = ["Attempt_1", "Attempt_2", "Attempt_3", "Last_Attempt", "Average", "Highest", "Lowest"]
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
     # Convert date column
-    if "date" in df.columns:
-        df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    if "Date" in df.columns:
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 
     # Create full name column
     df["full_name"] = df["Player_name_first"].fillna('') + " " + df["Player_name_last"].fillna('')
@@ -65,7 +65,7 @@ if selected_player != "All":
 if selected_metric and "All" not in selected_metric:
     df_filtered = df_filtered[df_filtered["Metric_Type"].isin(selected_metric)]
 if selected_team != "All":
-    df_filtered = df_filtered[df_filtered["team"] == selected_team]
+    df_filtered = df_filtered[df_filtered["Team"] == selected_team]
 
 # ========================
 # Tabs
@@ -100,21 +100,21 @@ with tab1:
                 st.markdown(f"### 📌 {metric}")
 
                 if "target" not in df_metric.columns:
-                    df_metric["target"] = df_metric["average"].mean()
+                    df_metric["target"] = df_metric["Average"].mean()
 
                 is_lower_better = metric in lower_is_better_metrics
 
-                best_score = df_metric["lowest"].min() if is_lower_better else df_metric["highest"].max()
-                latest_date = df_metric["date"].max()
-                latest_avg = df_metric[df_metric["date"] == latest_date]["average"].mean()
-                overall_avg = df_metric["average"].mean()
+                best_score = df_metric["Lowest"].min() if is_lower_better else df_metric["Highest"].max()
+                latest_date = df_metric["Date"].max()
+                latest_avg = df_metric[df_metric["Date"] == latest_date]["Average"].mean()
+                overall_avg = df_metric["Average"].mean()
                 avg_delta = overall_avg - latest_avg if is_lower_better else latest_avg - overall_avg
 
-                first_avg = df_metric.sort_values("date")["average"].iloc[0]
+                first_avg = df_metric.sort_values("Date")["Average"].iloc[0]
                 improvement_pct = ((first_avg - latest_avg) / first_avg * 100) if is_lower_better else ((latest_avg - first_avg) / first_avg * 100) if first_avg != 0 else 0
 
-                targets_met_pct = (df_metric["average"] <= df_metric["target"]).mean() * 100 if is_lower_better else (df_metric["average"] >= df_metric["target"]).mean() * 100
-                consistency_score = df_metric["average"].std()
+                targets_met_pct = (df_metric["Average"] <= df_metric["target"]).mean() * 100 if is_lower_better else (df_metric["Average"] >= df_metric["target"]).mean() * 100
+                consistency_score = df_metric["Average"].std()
 
                 col1, col2, col3 = st.columns(3)
                 col4, col5, col6 = st.columns(3)
@@ -166,7 +166,7 @@ with tab1:
             row_idx, col_idx = 0, 0
 
             for metric in gauge_metrics:
-                current_value = df_filtered[df_filtered["Metric_Type"]==metric]["average"].iloc[-1] if selected_player!="All" else df_filtered[df_filtered["Metric_Type"]==metric]["average"].mean()
+                current_value = df_filtered[df_filtered["Metric_Type"]==metric]["Average"].iloc[-1] if selected_player!="All" else df_filtered[df_filtered["Metric_Type"]==metric]["Average"].mean()
                 target_value = age_targets[metric]
                 if metric in lower_is_better:
                     delta_reference = target_value
@@ -220,21 +220,22 @@ with tab2:
     top_n = st.slider("Select number of top players to display", min_value=3, max_value=20, value=10, step=1)
 
     if leaderboard_metric:
-        df_leader = df[df["Metric_Type"]==leaderboard_metric].copy()
+        df_leader = df[df["Metric_Type"] == leaderboard_metric].copy()
         lower_is_better_metrics = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
         is_lower_better = leaderboard_metric in lower_is_better_metrics
 
         if is_lower_better:
-            df_best = df_leader.groupby("full_name")["average"].min().reset_index(name="best_score")
+            df_best = df_leader.groupby("full_name")["Average"].min().reset_index(name="best_score")
             df_best = df_best.sort_values("best_score", ascending=True).head(top_n)
         else:
-            df_best = df_leader.groupby("full_name")["average"].max().reset_index(name="best_score")
+            df_best = df_leader.groupby("full_name")["Average"].max().reset_index(name="best_score")
             df_best = df_best.sort_values("best_score", ascending=False).head(top_n)
 
-        df_best.insert(0,"Rank",range(1,len(df_best)+1))
+        df_best.insert(0, "Rank", range(1, len(df_best) + 1))
         st.write(f"### Top {len(df_best)} Players - {leaderboard_metric}")
         st.dataframe(df_best)
 
-        fig_leader = px.bar(df_best,x="full_name",y="best_score",color="full_name",text="best_score",title=f"Leaderboard - {leaderboard_metric}")
-        fig_leader.update_traces(texttemplate='%{text:.2f}',textposition='outside')
-        st.plotly_chart(fig_leader,use_container_width=True)
+        fig_leader = px.bar(df_best, x="full_name", y="best_score", color="full_name", text="best_score", title=f"Leaderboard - {leaderboard_metric}")
+        fig_leader.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+        st.plotly_chart(fig_leader, use_container_width=True)
+
