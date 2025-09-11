@@ -1,7 +1,7 @@
-flask
+streamlit
 pandas
-sqlalchemy
-flask-login
-openpyxl
 plotly
-dash
+gspread
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
