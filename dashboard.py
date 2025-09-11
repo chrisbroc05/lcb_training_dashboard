@@ -153,7 +153,7 @@ with tab1:
 
     st.subheader("🎯 Performance vs Targets")
     if not df_filtered.empty:
-        player_age = df_filtered["age"].iloc[0] if selected_player != "All" else df_filtered["age"].mean()
+        player_age = df_filtered["Age"].iloc[0] if selected_player != "All" else df_filtered["Age"].mean()
         age_group = get_age_group(player_age)
         age_targets = targets.get(age_group, {})
         metric_types_in_data = df_filtered["metric_type"].unique()
