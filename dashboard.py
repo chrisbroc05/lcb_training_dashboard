@@ -14,10 +14,9 @@ def load_data():
         "https://www.googleapis.com/auth/spreadsheets.readonly",
         "https://www.googleapis.com/auth/drive.readonly"
     ]
-    creds = Credentials.from_service_account_file(
-        "lcbtrainingportal-798a01b274bb.json",
-        scopes=SCOPES
-    )
+    # Load credentials from Streamlit Secrets
+    creds_dict = st.secrets["gcp_service_account"]
+    creds = Credentials.from_service_account_info(creds_dict)
     client = gspread.authorize(creds)
 
     # Open spreadsheet and worksheet
