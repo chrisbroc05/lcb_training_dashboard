@@ -16,7 +16,7 @@ def load_data():
     ]
     # Load credentials from Streamlit Secrets
     creds_dict = st.secrets["gcp_service_account"]
-    creds = Credentials.from_service_account_info(creds_dict)
+    creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
     client = gspread.authorize(creds)
 
     # Open spreadsheet and worksheet
