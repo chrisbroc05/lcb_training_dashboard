@@ -1,0 +1,7 @@
+flask
+pandas
+sqlalchemy
+flask-login
+openpyxl
+plotly
+dash
