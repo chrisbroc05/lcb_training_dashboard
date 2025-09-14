@@ -73,39 +73,37 @@ with tab1:
         player_df = df[df["full_name"] == selected_player]
 
         if not player_df.empty:
-            # Profile Card
+            # Profile Card (with black text)
             player_age = player_df["Age"].iloc[0]
             player_team = player_df["Team"].iloc[0]
             total_sessions = player_df["Date"].nunique()
 
             st.markdown(f"""
-            <div style="background-color:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:10px;">
-                <h3>{selected_player}</h3>
+            <div style="background-color:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:10px;color:black;">
+                <h3 style="color:black;">{selected_player}</h3>
                 <p><b>Team:</b> {player_team}</p>
                 <p><b>Age:</b> {player_age} ({get_age_group(player_age)})</p>
                 <p><b>Total Sessions:</b> {total_sessions}</p>
             </div>
             """, unsafe_allow_html=True)
 
-            # Gauges / Progress
+            # Gauges per metric (each metric rendered separately)
             st.subheader("Performance vs Targets")
             age_targets = targets.get(get_age_group(player_age), {})
             gauge_metrics = [m for m in player_df["Metric_Type"].unique() if m in age_targets]
 
             if gauge_metrics:
-                fig = go.Figure()
                 for metric in gauge_metrics:
                     current_value = player_df[player_df["Metric_Type"]==metric]["Average"].iloc[-1]
                     target_value = age_targets[metric]
-                    fig.add_trace(go.Indicator(
+                    fig = go.Figure(go.Indicator(
                         mode="gauge+number+delta",
                         value=current_value,
                         delta={"reference": target_value},
                         title={"text": metric},
                         gauge={"axis":{"range":[0,target_value*1.5]}}
                     ))
-                fig.update_layout(grid={'rows':len(gauge_metrics), 'columns':1, 'pattern':"independent"})
-                st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("No targets available for this player.")
 
@@ -138,36 +136,33 @@ with tab2:
             total_players = team_df["full_name"].nunique()
 
             st.markdown(f"""
-            <div style="background-color:#e8f4f8;padding:15px;border-radius:10px;margin-bottom:10px;">
-                <h3>{selected_team}</h3>
+            <div style="background-color:#e8f4f8;padding:15px;border-radius:10px;margin-bottom:10px;color:black;">
+                <h3 style="color:black;">{selected_team}</h3>
                 <p><b>Players:</b> {total_players}</p>
                 <p><b>Average Age:</b> {avg_age}</p>
                 <p><b>Total Sessions:</b> {total_sessions}</p>
             </div>
             """, unsafe_allow_html=True)
 
-            # Team averages vs targets
+            # Team averages vs targets (include all metrics)
             st.subheader("Team Averages vs Targets")
-            age_group = get_age_group(avg_age)
-            team_targets = targets.get(age_group, {})
-
             avg_by_metric = team_df.groupby("Metric_Type")["Average"].mean().reset_index()
-            avg_by_metric = avg_by_metric[avg_by_metric["Metric_Type"].isin(team_targets.keys())]
-            avg_by_metric["Target"] = avg_by_metric["Metric_Type"].map(team_targets)
+            avg_by_metric["Target"] = avg_by_metric["Metric_Type"].apply(
+                lambda m: targets.get(get_age_group(avg_age), {}).get(m, None)
+            )
 
-            if not avg_by_metric.empty:
-                fig_bar = px.bar(
-                    avg_by_metric,
-                    x="Metric_Type",
-                    y=["Average", "Target"],
-                    barmode="group",
-                    title="Team Average vs Target"
-                )
-                st.plotly_chart(fig_bar, use_container_width=True)
+            fig_bar = px.bar(
+                avg_by_metric,
+                x="Metric_Type",
+                y="Average",
+                color="Metric_Type",
+                title="Team Average (with Targets if available)"
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
 
-            # Team leaderboard
+            # Team leaderboard (all metrics, not just those with targets)
             st.subheader("Team Leaderboard")
-            for metric in avg_by_metric["Metric_Type"].unique():
+            for metric in team_df["Metric_Type"].unique():
                 df_metric = team_df[team_df["Metric_Type"] == metric]
                 is_lower_better = metric in lower_is_better
                 if is_lower_better:
@@ -183,7 +178,7 @@ with tab2:
             # Raw Data
             st.subheader("Team Data")
             st.dataframe(team_df)
-
+            
 # ========================
 # 3. Leaderboard Tab
 # ========================
