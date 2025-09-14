@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ========================
-# 1. Load Google Sheets data
+# 1. Load Google Sheets Data
 # ========================
 @st.cache_data
 def load_data():
@@ -14,204 +14,180 @@ def load_data():
         "https://www.googleapis.com/auth/spreadsheets.readonly",
         "https://www.googleapis.com/auth/drive.readonly"
     ]
-    # Load credentials from Streamlit Secrets
     creds_dict = st.secrets["gcp_service_account"]
     creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
     client = gspread.authorize(creds)
 
-    # Open spreadsheet and worksheet
     spreadsheet = client.open("LCBTraining Data")
     worksheet = spreadsheet.worksheet("Data")
     data = worksheet.get_all_records()
-
     df = pd.DataFrame(data)
 
-    # Convert numeric columns
+    # Convert numeric and date columns
     numeric_cols = ["Attempt_1", "Attempt_2", "Attempt_3", "Last_Attempt", "Average", "Highest", "Lowest"]
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
-
-    # Convert date column
     if "Date" in df.columns:
         df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 
-    # Create full name column
+    # Full name column
     df["full_name"] = df["Player_name_first"].fillna('') + " " + df["Player_name_last"].fillna('')
-
     return df
 
-# Load the data
 df = load_data()
 
 # ========================
-# Sidebar Filters (global)
+# Helper Functions
 # ========================
-st.sidebar.header("Filter Data")
+def get_age_group(age):
+    if age <= 8: return "8U"
+    elif age <= 10: return "10U"
+    elif age <= 12: return "12U"
+    elif age <= 14: return "14U"
+    else: return "16U"
 
-players = sorted(df["full_name"].dropna().unique())
-selected_player = st.sidebar.selectbox("Select Player", ["All"] + players)
-
-metric_types = sorted(df["Metric_Type"].dropna().unique())
-selected_metric = st.sidebar.multiselect("Select Metric Type", ["All"] + metric_types)
-
-teams = sorted(df["Team"].dropna().unique())
-selected_team = st.sidebar.selectbox("Select Team", ["All"] + teams)
-
-# Apply filters
-df_filtered = df.copy()
-if selected_player != "All":
-    df_filtered = df_filtered[df_filtered["full_name"] == selected_player]
-if selected_metric and "All" not in selected_metric:
-    df_filtered = df_filtered[df_filtered["Metric_Type"].isin(selected_metric)]
-if selected_team != "All":
-    df_filtered = df_filtered[df_filtered["Team"] == selected_team]
+lower_is_better = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
+targets = {
+    "8U": {"Bench":30,"Squat":50,"Pull Ups":2,"BES - Tee":40,"BES - Flip":35,"10 yard sprint":2.2,"Pro Agility":5.5,"Arm Speed - Regular":35,"Arm Speed - Pitch":30,"Home to 1B sprint":4.5},
+    "10U":{"Bench":40,"Squat":70,"Pull Ups":4,"BES - Tee":50,"BES - Flip":45,"10 yard sprint":2.0,"Pro Agility":5.0,"Arm Speed - Regular":45,"Arm Speed - Pitch":40,"Home to 1B sprint":4.2},
+    "12U":{"Bench":50,"Squat":90,"Pull Ups":6,"BES - Tee":60,"BES - Flip":55,"10 yard sprint":1.9,"Pro Agility":4.8,"Arm Speed - Regular":55,"Arm Speed - Pitch":50,"Home to 1B sprint":4.0},
+    "14U":{"Bench":70,"Squat":110,"Pull Ups":8,"BES - Tee":70,"BES - Flip":65,"10 yard sprint":1.8,"Pro Agility":4.6,"Arm Speed - Regular":65,"Arm Speed - Pitch":60,"Home to 1B sprint":3.9},
+    "16U":{"Bench":90,"Squat":140,"Pull Ups":10,"BES - Tee":80,"BES - Flip":75,"10 yard sprint":1.7,"Pro Agility":4.5,"Arm Speed - Regular":75,"Arm Speed - Pitch":70,"Home to 1B sprint":3.8}
+}
 
 # ========================
-# Tabs
+# Main Layout
 # ========================
-tab1, tab2 = st.tabs(["📊 Dashboard", "🏆 Leaderboard"])
+tab1, tab2, tab3 = st.tabs(["👤 Players", "👥 Teams", "🏆 Leaderboard"])
 
 # ========================
-# 2. Dashboard Tab
+# Players Tab
 # ========================
 with tab1:
-    st.title("LCB Training Portal")
-    st.write(f"### Team: {selected_team if selected_team != 'All' else 'All Teams'}")
-    if selected_player != "All":
-        st.write(f"### Player: {selected_player}")
-    if selected_metric != "All":
-        st.write(f"### Metric: {selected_metric}")
+    st.title("Player Insights")
+    players = sorted(df["full_name"].dropna().unique())
+    selected_player = st.selectbox("Select Player", players)
 
-    # Summary Metrics Cards
-    if not df_filtered.empty:
-        total_sessions = df_filtered["Date"].nunique()
-        lower_is_better_metrics = ["10 yard sprint", "Pro Agility", "Home to 1B sprint"]
+    if selected_player:
+        player_df = df[df["full_name"] == selected_player]
 
-        if selected_metric == "All":
-            metrics_to_use = df_filtered["Metric_Type"].unique().tolist()
-        else:
-            metrics_to_use = selected_metric if isinstance(selected_metric, list) else [selected_metric]
+        if not player_df.empty:
+            # Profile Card
+            player_age = player_df["Age"].iloc[0]
+            player_team = player_df["Team"].iloc[0]
+            total_sessions = player_df["Date"].nunique()
 
-        for metric in metrics_to_use:
-            df_metric = df_filtered[df_filtered["Metric_Type"] == metric]
+            st.markdown(f"""
+            <div style="background-color:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:10px;">
+                <h3>{selected_player}</h3>
+                <p><b>Team:</b> {player_team}</p>
+                <p><b>Age:</b> {player_age} ({get_age_group(player_age)})</p>
+                <p><b>Total Sessions:</b> {total_sessions}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-            if not df_metric.empty:
-                st.markdown(f"### 📌 {metric}")
+            # Gauges / Progress
+            st.subheader("Performance vs Targets")
+            age_targets = targets.get(get_age_group(player_age), {})
+            gauge_metrics = [m for m in player_df["Metric_Type"].unique() if m in age_targets]
 
-                if "target" not in df_metric.columns:
-                    df_metric["target"] = df_metric["Average"].mean()
-
-                is_lower_better = metric in lower_is_better_metrics
-
-                best_score = df_metric["Lowest"].min() if is_lower_better else df_metric["Highest"].max()
-                latest_date = df_metric["Date"].max()
-                latest_avg = df_metric[df_metric["Date"] == latest_date]["Average"].mean()
-                overall_avg = df_metric["Average"].mean()
-                avg_delta = overall_avg - latest_avg if is_lower_better else latest_avg - overall_avg
-
-                first_avg = df_metric.sort_values("Date")["Average"].iloc[0]
-                improvement_pct = ((first_avg - latest_avg) / first_avg * 100) if is_lower_better else ((latest_avg - first_avg) / first_avg * 100) if first_avg != 0 else 0
-
-                targets_met_pct = (df_metric["Average"] <= df_metric["target"]).mean() * 100 if is_lower_better else (df_metric["Average"] >= df_metric["target"]).mean() * 100
-                consistency_score = df_metric["Average"].std()
-
-                col1, col2, col3 = st.columns(3)
-                col4, col5, col6 = st.columns(3)
-
-                col1.metric(label="🏆 Best Score", value=f"{best_score:.2f}")
-                col2.metric(label="📊 Latest Avg vs Overall", value=f"{latest_avg:.2f}", delta=f"{avg_delta:+.2f}")
-                col3.metric(label="📈 Improvement %", value=f"{improvement_pct:+.1f}%")
-                col4.metric(label="🎯 % Targets Met", value=f"{targets_met_pct:.1f}%")
-                col5.metric(label="📉 Consistency (Std Dev)", value=f"{consistency_score:.2f}")
-                col6.metric(label="🗓️ Number of Sessions", value=total_sessions)
-
-                st.markdown("---")
+            if gauge_metrics:
+                fig = go.Figure()
+                for metric in gauge_metrics:
+                    current_value = player_df[player_df["Metric_Type"]==metric]["Average"].iloc[-1]
+                    target_value = age_targets[metric]
+                    fig.add_trace(go.Indicator(
+                        mode="gauge+number+delta",
+                        value=current_value,
+                        delta={"reference": target_value},
+                        title={"text": metric},
+                        gauge={"axis":{"range":[0,target_value*1.5]}}
+                    ))
+                fig.update_layout(grid={'rows':len(gauge_metrics), 'columns':1, 'pattern':"independent"})
+                st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info(f"No data available for metric: {metric}")
-    else:
-        st.info("No data available for the current selection.")
+                st.info("No targets available for this player.")
 
-    # -----------------
-    # Multi-Gauge Charts (Performance vs Targets)
-    # -----------------
-    def get_age_group(age):
-        if age <= 8: return "8U"
-        elif age <= 10: return "10U"
-        elif age <= 12: return "12U"
-        elif age <= 14: return "14U"
-        else: return "16U"
+            # Trends
+            st.subheader("Progress Over Time")
+            for metric in player_df["Metric_Type"].unique():
+                df_metric = player_df[player_df["Metric_Type"] == metric]
+                if len(df_metric) > 1:
+                    fig_line = px.line(df_metric, x="Date", y="Average", title=f"{metric} Progress", markers=True)
+                    st.plotly_chart(fig_line, use_container_width=True)
 
-    lower_is_better = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
-    targets = {
-        "8U": {"Bench":30, "Squat":50, "Pull Ups":2,"BES - Tee":40,"BES - Flip":35,"10 yard sprint":2.2,"Pro Agility":5.5,"Arm Speed - Regular":35,"Arm Speed - Pitch":30,"Home to 1B sprint":4.5},
-        "10U":{"Bench":40,"Squat":70,"Pull Ups":4,"BES - Tee":50,"BES - Flip":45,"10 yard sprint":2.0,"Pro Agility":5.0,"Arm Speed - Regular":45,"Arm Speed - Pitch":40,"Home to 1B sprint":4.2},
-        "12U":{"Bench":50,"Squat":90,"Pull Ups":6,"BES - Tee":60,"BES - Flip":55,"10 yard sprint":1.9,"Pro Agility":4.8,"Arm Speed - Regular":55,"Arm Speed - Pitch":50,"Home to 1B sprint":4.0},
-        "14U":{"Bench":70,"Squat":110,"Pull Ups":8,"BES - Tee":70,"BES - Flip":65,"10 yard sprint":1.8,"Pro Agility":4.6,"Arm Speed - Regular":65,"Arm Speed - Pitch":60,"Home to 1B sprint":3.9},
-        "16U":{"Bench":90,"Squat":140,"Pull Ups":10,"BES - Tee":80,"BES - Flip":75,"10 yard sprint":1.7,"Pro Agility":4.5,"Arm Speed - Regular":75,"Arm Speed - Pitch":70,"Home to 1B sprint":3.8}
-    }
+            # Raw Data
+            st.subheader("Raw Data")
+            st.dataframe(player_df)
 
-    st.subheader("🎯 Performance vs Targets")
-    if not df_filtered.empty:
-        player_age = df_filtered["Age"].iloc[0] if selected_player != "All" else df_filtered["Age"].mean()
-        age_group = get_age_group(player_age)
-        age_targets = targets.get(age_group, {})
-        metric_types_in_data = df_filtered["Metric_Type"].unique()
-        gauge_metrics = [m for m in metric_types_in_data if m in age_targets]
+# ========================
+# Teams Tab
+# ========================
+with tab2:
+    st.title("Team Insights")
+    teams = sorted(df["Team"].dropna().unique())
+    selected_team = st.selectbox("Select Team", teams)
 
-        if gauge_metrics:
-            num_metrics = len(gauge_metrics)
-            rows = (num_metrics // 2) + (num_metrics % 2)
-            fig = go.Figure()
-            row_idx, col_idx = 0, 0
+    if selected_team:
+        team_df = df[df["Team"] == selected_team]
 
-            for metric in gauge_metrics:
-                current_value = df_filtered[df_filtered["Metric_Type"]==metric]["Average"].iloc[-1] if selected_player!="All" else df_filtered[df_filtered["Metric_Type"]==metric]["Average"].mean()
-                target_value = age_targets[metric]
-                if metric in lower_is_better:
-                    delta_reference = target_value
-                    delta_increasing_color="red"
-                    delta_decreasing_color="green"
+        if not team_df.empty:
+            avg_age = round(team_df["Age"].mean(), 1)
+            total_sessions = team_df["Date"].nunique()
+            total_players = team_df["full_name"].nunique()
+
+            st.markdown(f"""
+            <div style="background-color:#e8f4f8;padding:15px;border-radius:10px;margin-bottom:10px;">
+                <h3>{selected_team}</h3>
+                <p><b>Players:</b> {total_players}</p>
+                <p><b>Average Age:</b> {avg_age}</p>
+                <p><b>Total Sessions:</b> {total_sessions}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Team averages vs targets
+            st.subheader("Team Averages vs Targets")
+            age_group = get_age_group(avg_age)
+            team_targets = targets.get(age_group, {})
+
+            avg_by_metric = team_df.groupby("Metric_Type")["Average"].mean().reset_index()
+            avg_by_metric = avg_by_metric[avg_by_metric["Metric_Type"].isin(team_targets.keys())]
+            avg_by_metric["Target"] = avg_by_metric["Metric_Type"].map(team_targets)
+
+            if not avg_by_metric.empty:
+                fig_bar = px.bar(
+                    avg_by_metric,
+                    x="Metric_Type",
+                    y=["Average", "Target"],
+                    barmode="group",
+                    title="Team Average vs Target"
+                )
+                st.plotly_chart(fig_bar, use_container_width=True)
+
+            # Team leaderboard
+            st.subheader("Team Leaderboard")
+            for metric in avg_by_metric["Metric_Type"].unique():
+                df_metric = team_df[team_df["Metric_Type"] == metric]
+                is_lower_better = metric in lower_is_better
+                if is_lower_better:
+                    df_best = df_metric.groupby("full_name")["Average"].min().reset_index(name="best_score")
+                    df_best = df_best.sort_values("best_score", ascending=True)
                 else:
-                    delta_reference=target_value
-                    delta_increasing_color="green"
-                    delta_decreasing_color="red"
+                    df_best = df_metric.groupby("full_name")["Average"].max().reset_index(name="best_score")
+                    df_best = df_best.sort_values("best_score", ascending=False)
+                df_best.insert(0, "Rank", range(1, len(df_best)+1))
+                st.write(f"### {metric}")
+                st.dataframe(df_best)
 
-                fig.add_trace(go.Indicator(
-                    mode="gauge+number+delta",
-                    value=current_value,
-                    delta={"reference":delta_reference,"increasing":{"color":delta_increasing_color},"decreasing":{"color":delta_decreasing_color}},
-                    title={"text":metric},
-                    gauge={
-                        "axis":{"range":[0,target_value*1.5]},
-                        "bar":{"color":"blue"},
-                        "steps":[{"range":[0,target_value*0.7],"color":"red"},
-                                 {"range":[target_value*0.7,target_value*0.9],"color":"yellow"},
-                                 {"range":[target_value*0.9,target_value*1.1],"color":"green"}],
-                        "threshold":{"line":{"color":"black","width":4},"thickness":0.75,"value":target_value}
-                    },
-                    domain={'row':row_idx,'column':col_idx}
-                ))
-                col_idx +=1
-                if col_idx>1:
-                    col_idx=0
-                    row_idx+=1
-
-            fig.update_layout(grid={'rows':rows,'columns':2,'pattern':"independent"},height=rows*300)
-            st.plotly_chart(fig,use_container_width=True)
-        else:
-            st.warning("No metrics available for target comparison.")
-
-    # -----------------
-    # Raw Data Table
-    # -----------------
-    st.subheader("Raw Data")
-    st.dataframe(df_filtered)
+            # Raw Data
+            st.subheader("Team Data")
+            st.dataframe(team_df)
 
 # ========================
 # 3. Leaderboard Tab
 # ========================
-with tab2:
+with tab3:
     st.subheader("🏆 Leaderboard")
 
     all_metrics = sorted(df["Metric_Type"].dropna().unique())
