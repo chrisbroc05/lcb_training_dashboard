@@ -88,42 +88,42 @@ with tab1:
             """, unsafe_allow_html=True)
 
             # ========================
-# Players Tab – Gauges per metric
-# ========================
-st.subheader("Performance vs Targets")
-age_targets = targets.get(get_age_group(player_age), {})
-gauge_metrics = [m for m in player_df["Metric_Type"].unique() if m in age_targets]
-
-if gauge_metrics:
-    for metric in gauge_metrics:
-        current_value = player_df[player_df["Metric_Type"]==metric]["Average"].iloc[-1]
-        target_value = age_targets[metric]
-
-        is_lower_better = metric in lower_is_better
-        axis_range = [0, target_value*1.5]
-
-        fig = go.Figure(go.Indicator(
-            mode="gauge+number+delta",
-            value=current_value,
-            delta={"reference": target_value, "increasing": {"color": "red"}, "decreasing": {"color": "green"}},
-            title={"text": metric},
-            gauge={
-                "axis": {"range": axis_range},
-                "bar": {"color": "blue"},
-                "steps": [
-                    {"range": [0, target_value], "color": "lightgreen" if not is_lower_better else "lightcoral"},
-                    {"range": [target_value, axis_range[1]], "color": "lightcoral" if not is_lower_better else "lightgreen"},
-                ],
-                "threshold": {
-                    "line": {"color": "black", "width": 4},
-                    "thickness": 0.75,
-                    "value": target_value
-                }
-            }
-        ))
-        st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("No targets available for this player.")
+            # Players Tab – Gauges per metric
+            # ========================
+            st.subheader("Performance vs Targets")
+            age_targets = targets.get(get_age_group(player_age), {})
+            gauge_metrics = [m for m in player_df["Metric_Type"].unique() if m in age_targets]
+            
+            if gauge_metrics:
+                for metric in gauge_metrics:
+                    current_value = player_df[player_df["Metric_Type"]==metric]["Average"].iloc[-1]
+                    target_value = age_targets[metric]
+            
+                    is_lower_better = metric in lower_is_better
+                    axis_range = [0, target_value*1.5]
+            
+                    fig = go.Figure(go.Indicator(
+                        mode="gauge+number+delta",
+                        value=current_value,
+                        delta={"reference": target_value, "increasing": {"color": "red"}, "decreasing": {"color": "green"}},
+                        title={"text": metric},
+                        gauge={
+                            "axis": {"range": axis_range},
+                            "bar": {"color": "blue"},
+                            "steps": [
+                                {"range": [0, target_value], "color": "lightgreen" if not is_lower_better else "lightcoral"},
+                                {"range": [target_value, axis_range[1]], "color": "lightcoral" if not is_lower_better else "lightgreen"},
+                            ],
+                            "threshold": {
+                                "line": {"color": "black", "width": 4},
+                                "thickness": 0.75,
+                                "value": target_value
+                            }
+                        }
+                    ))
+                    st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No targets available for this player.")
 
             # Trends
             st.subheader("Progress Over Time")
@@ -163,34 +163,34 @@ with tab2:
             """, unsafe_allow_html=True)
 
            # ========================
-# Teams Tab – Team averages vs targets
-# ========================
-st.subheader("Team Averages vs Targets")
-avg_by_metric = team_df.groupby("Metric_Type")["Average"].mean().reset_index()
-avg_by_metric["Target"] = avg_by_metric["Metric_Type"].apply(
-    lambda m: targets.get(get_age_group(avg_age), {}).get(m, None)
-)
-
-# Base bar chart for averages
-fig_bar = px.bar(
-    avg_by_metric,
-    x="Metric_Type",
-    y="Average",
-    color="Metric_Type",
-    title="Team Average vs Target"
-)
-
-# Overlay target markers (black X at target)
-for _, row in avg_by_metric.dropna(subset=["Target"]).iterrows():
-    fig_bar.add_scatter(
-        x=[row["Metric_Type"]],
-        y=[row["Target"]],
-        mode="markers",
-        marker=dict(color="black", symbol="x", size=12),
-        name=f"Target ({row['Metric_Type']})"
-    )
-
-st.plotly_chart(fig_bar, use_container_width=True)
+            # Teams Tab – Team averages vs targets
+            # ========================
+            st.subheader("Team Averages vs Targets")
+            avg_by_metric = team_df.groupby("Metric_Type")["Average"].mean().reset_index()
+            avg_by_metric["Target"] = avg_by_metric["Metric_Type"].apply(
+                lambda m: targets.get(get_age_group(avg_age), {}).get(m, None)
+            )
+            
+            # Base bar chart for averages
+            fig_bar = px.bar(
+                avg_by_metric,
+                x="Metric_Type",
+                y="Average",
+                color="Metric_Type",
+                title="Team Average vs Target"
+            )
+            
+            # Overlay target markers (black X at target)
+            for _, row in avg_by_metric.dropna(subset=["Target"]).iterrows():
+                fig_bar.add_scatter(
+                    x=[row["Metric_Type"]],
+                    y=[row["Target"]],
+                    mode="markers",
+                    marker=dict(color="black", symbol="x", size=12),
+                    name=f"Target ({row['Metric_Type']})"
+                )
+            
+            st.plotly_chart(fig_bar, use_container_width=True)
 
 
             # Team leaderboard (all metrics, not just those with targets)
