@@ -49,11 +49,11 @@ def get_age_group(age):
 
 lower_is_better = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
 targets = {
-    "8U": {"Bench":30,"Squat":50,"Pull Ups":2,"BES - Tee":40,"BES - Flip":35,"10 yard sprint":2.2,"Pro Agility":5.5,"Arm Speed - Regular":35,"Arm Speed - Pitch":30,"Home to 1B sprint":4.5},
-    "10U":{"Bench":40,"Squat":70,"Pull Ups":4,"BES - Tee":50,"BES - Flip":45,"10 yard sprint":2.0,"Pro Agility":5.0,"Arm Speed - Regular":45,"Arm Speed - Pitch":40,"Home to 1B sprint":4.2},
-    "12U":{"Bench":50,"Squat":90,"Pull Ups":6,"BES - Tee":60,"BES - Flip":55,"10 yard sprint":1.9,"Pro Agility":4.8,"Arm Speed - Regular":55,"Arm Speed - Pitch":50,"Home to 1B sprint":4.0},
-    "14U":{"Bench":70,"Squat":110,"Pull Ups":8,"BES - Tee":70,"BES - Flip":65,"10 yard sprint":1.8,"Pro Agility":4.6,"Arm Speed - Regular":65,"Arm Speed - Pitch":60,"Home to 1B sprint":3.9},
-    "16U":{"Bench":90,"Squat":140,"Pull Ups":10,"BES - Tee":80,"BES - Flip":75,"10 yard sprint":1.7,"Pro Agility":4.5,"Arm Speed - Regular":75,"Arm Speed - Pitch":70,"Home to 1B sprint":3.8}
+    "8U": {"Bench":30,"Squat":50,"Pull Ups":2,"BES - Tee":40,"BES Flip":35,"10 yard sprint":2.2,"Pro Agility":5.5,"Arm Speed Regular":35,"Arm Speed Pitch":30,"Home to 1B sprint":4.5},
+    "10U":{"Bench":40,"Squat":70,"Pull Ups":4,"BES - Tee":50,"BES Flip":45,"10 yard sprint":2.0,"Pro Agility":5.0,"Arm Speed Regular":45,"Arm Speed Pitch":40,"Home to 1B sprint":4.2},
+    "12U":{"Bench":50,"Squat":90,"Pull Ups":6,"BES - Tee":60,"BES Flip":55,"10 yard sprint":1.9,"Pro Agility":4.8,"Arm Speed Regular":55,"Arm Speed Pitch":50,"Home to 1B sprint":4.0},
+    "14U":{"Bench":70,"Squat":110,"Pull Ups":8,"BES - Tee":70,"BES Flip":65,"10 yard sprint":1.8,"Pro Agility":4.6,"Arm Speed Regular":65,"Arm Speed Pitch":60,"Home to 1B sprint":3.9},
+    "16U":{"Bench":90,"Squat":140,"Pull Ups":10,"BES - Tee":80,"BES Flip":75,"10 yard sprint":1.7,"Pro Agility":4.5,"Arm Speed Regular":75,"Arm Speed Pitch":70,"Home to 1B sprint":3.8}
 }
 
 # ========================
