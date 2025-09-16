@@ -241,18 +241,37 @@ with tab3:
     top_n = st.slider("Select number of top players to display", min_value=3, max_value=20, value=10, step=1)
 
     if leaderboard_metric:
+        # Filter for selected metric
         df_leader = df[df["Metric_Type"] == leaderboard_metric].copy()
+
+        # Lower is better for sprint/agility metrics
         lower_is_better_metrics = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
         is_lower_better = leaderboard_metric in lower_is_better_metrics
 
+        # Group by player and include Team + Age
         if is_lower_better:
-            df_best = df_leader.groupby("full_name")["Average"].min().reset_index(name="best_score")
-            df_best = df_best.sort_values("best_score", ascending=True).head(top_n)
+            df_best = (
+                df_leader.groupby(["full_name", "Team", "Age"])["Average"]
+                .min()
+                .reset_index(name="best_score")
+                .sort_values("best_score", ascending=True)
+                .head(top_n)
+            )
         else:
-            df_best = df_leader.groupby("full_name")["Average"].max().reset_index(name="best_score")
-            df_best = df_best.sort_values("best_score", ascending=False).head(top_n)
+            df_best = (
+                df_leader.groupby(["full_name", "Team", "Age"])["Average"]
+                .max()
+                .reset_index(name="best_score")
+                .sort_values("best_score", ascending=False)
+                .head(top_n)
+            )
 
+        # Add ranking column
         df_best.insert(0, "Rank", range(1, len(df_best) + 1))
+
+        # Reorder columns for a clean table display
+        df_best = df_best[["Rank", "full_name", "Team", "Age", "best_score"]]
+
         st.write(f"### Top {len(df_best)} Players - {leaderboard_metric}")
         st.dataframe(df_best)
 
