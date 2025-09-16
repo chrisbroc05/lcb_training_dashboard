@@ -49,11 +49,11 @@ def get_age_group(age):
 
 lower_is_better = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
 targets = {
-    "8U": {"Bench":30,"Squat":50,"Pull Ups":2,"BES - Tee":40,"BES Flip":35,"10 yard sprint":2.2,"Pro Agility":5.5,"Arm Speed Regular":35,"Arm Speed Pitch":30,"Home to 1B sprint":4.5},
-    "10U":{"Bench":40,"Squat":70,"Pull Ups":4,"BES - Tee":50,"BES Flip":45,"10 yard sprint":2.0,"Pro Agility":5.0,"Arm Speed Regular":45,"Arm Speed Pitch":40,"Home to 1B sprint":4.2},
-    "12U":{"Bench":50,"Squat":90,"Pull Ups":6,"BES - Tee":60,"BES Flip":55,"10 yard sprint":1.9,"Pro Agility":4.8,"Arm Speed Regular":55,"Arm Speed Pitch":50,"Home to 1B sprint":4.0},
-    "14U":{"Bench":70,"Squat":110,"Pull Ups":8,"BES - Tee":70,"BES Flip":65,"10 yard sprint":1.8,"Pro Agility":4.6,"Arm Speed Regular":65,"Arm Speed Pitch":60,"Home to 1B sprint":3.9},
-    "16U":{"Bench":90,"Squat":140,"Pull Ups":10,"BES - Tee":80,"BES Flip":75,"10 yard sprint":1.7,"Pro Agility":4.5,"Arm Speed Regular":75,"Arm Speed Pitch":70,"Home to 1B sprint":3.8}
+    "8U": {"Bench":30,"Squat":50,"Pull Ups":2,"BES Tee":40,"BES Flip":35,"10 yard sprint":2.2,"Pro Agility":5.5,"Arm Speed Regular":35,"Arm Speed Pitch":30,"Home to 1B sprint":4.5},
+    "10U":{"Bench":40,"Squat":70,"Pull Ups":4,"BES Tee":50,"BES Flip":45,"10 yard sprint":2.0,"Pro Agility":5.0,"Arm Speed Regular":45,"Arm Speed Pitch":40,"Home to 1B sprint":4.2},
+    "12U":{"Bench":50,"Squat":90,"Pull Ups":6,"BES Tee":60,"BES Flip":55,"10 yard sprint":1.9,"Pro Agility":4.8,"Arm Speed Regular":55,"Arm Speed Pitch":50,"Home to 1B sprint":4.0},
+    "14U":{"Bench":70,"Squat":110,"Pull Ups":8,"BES Tee":70,"BES Flip":65,"10 yard sprint":1.8,"Pro Agility":4.6,"Arm Speed Regular":65,"Arm Speed Pitch":60,"Home to 1B sprint":3.9},
+    "16U":{"Bench":90,"Squat":140,"Pull Ups":10,"BES Tee":80,"BES Flip":75,"10 yard sprint":1.7,"Pro Agility":4.5,"Arm Speed Regular":75,"Arm Speed Pitch":70,"Home to 1B sprint":3.8}
 }
 
 # ========================
@@ -162,35 +162,52 @@ with tab2:
             </div>
             """, unsafe_allow_html=True)
 
-           # ========================
-            # Teams Tab – Team averages vs targets
+            # ========================
+            # Teams Tab – Team averages vs targets (with dropdown)
             # ========================
             st.subheader("Team Averages vs Targets")
+            
+            # Compute averages and attach targets
             avg_by_metric = team_df.groupby("Metric_Type")["Average"].mean().reset_index()
             avg_by_metric["Target"] = avg_by_metric["Metric_Type"].apply(
                 lambda m: targets.get(get_age_group(avg_age), {}).get(m, None)
             )
             
-            # Base bar chart for averages
-            fig_bar = px.bar(
-                avg_by_metric,
-                x="Metric_Type",
-                y="Average",
-                color="Metric_Type",
-                title="Team Average vs Target"
+            # Dropdown to choose metric
+            metric_options = avg_by_metric["Metric_Type"].unique()
+            selected_metric = st.selectbox("Select Metric", metric_options)
+            
+            # Filter to the selected metric
+            metric_data = avg_by_metric[avg_by_metric["Metric_Type"] == selected_metric].iloc[0]
+            
+            # Build comparison bar chart
+            fig_bar = go.Figure()
+            
+            # Add team average bar
+            fig_bar.add_trace(go.Bar(
+                x=["Team Average"],
+                y=[metric_data["Average"]],
+                name="Team Average",
+                marker_color="blue"
+            ))
+            
+            # Add target bar (only if exists)
+            if pd.notna(metric_data["Target"]):
+                fig_bar.add_trace(go.Bar(
+                    x=["Target"],
+                    y=[metric_data["Target"]],
+                    name="Target",
+                    marker_color="green"
+                ))
+            
+            fig_bar.update_layout(
+                title=f"{selected_metric}: Team Average vs Target",
+                yaxis_title="Value",
+                barmode="group"
             )
             
-            # Overlay target markers (black X at target)
-            for _, row in avg_by_metric.dropna(subset=["Target"]).iterrows():
-                fig_bar.add_scatter(
-                    x=[row["Metric_Type"]],
-                    y=[row["Target"]],
-                    mode="markers",
-                    marker=dict(color="black", symbol="x", size=12),
-                    name=f"Target ({row['Metric_Type']})"
-                )
-            
             st.plotly_chart(fig_bar, use_container_width=True)
+
 
 
             # Team leaderboard (all metrics, not just those with targets)
