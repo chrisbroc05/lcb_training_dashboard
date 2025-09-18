@@ -88,7 +88,7 @@ with tab1:
             """, unsafe_allow_html=True)
 
             # ========================
-            # Players Tab – Gauges per metric
+            # Players Tab – Gauges per metric (with correct delta colors)
             # ========================
             st.subheader("Performance vs Targets")
             age_targets = targets.get(get_age_group(player_age), {})
@@ -96,16 +96,26 @@ with tab1:
             
             if gauge_metrics:
                 for metric in gauge_metrics:
-                    current_value = player_df[player_df["Metric_Type"]==metric]["Average"].iloc[-1]
+                    current_value = player_df[player_df["Metric_Type"] == metric]["Average"].iloc[-1]
                     target_value = age_targets[metric]
             
                     is_lower_better = metric in lower_is_better
-                    axis_range = [0, target_value*1.5]
+                    axis_range = [0, target_value * 1.5]
+            
+                    # ✅ Fix: Adjust delta colors dynamically
+                    delta_colors = (
+                        {"increasing": {"color": "green"}, "decreasing": {"color": "red"}}
+                        if not is_lower_better
+                        else {"increasing": {"color": "red"}, "decreasing": {"color": "green"}}
+                    )
             
                     fig = go.Figure(go.Indicator(
                         mode="gauge+number+delta",
                         value=current_value,
-                        delta={"reference": target_value, "increasing": {"color": "red"}, "decreasing": {"color": "green"}},
+                        delta={
+                            "reference": target_value,
+                            **delta_colors
+                        },
                         title={"text": metric},
                         gauge={
                             "axis": {"range": axis_range},
@@ -124,7 +134,7 @@ with tab1:
                     st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("No targets available for this player.")
-
+                
             # Trends
             st.subheader("Progress Over Time")
             for metric in player_df["Metric_Type"].unique():
