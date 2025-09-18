@@ -135,13 +135,25 @@ with tab1:
             else:
                 st.info("No targets available for this player.")
                 
+            # ========================
             # Trends
+            # ========================
             st.subheader("Progress Over Time")
             for metric in player_df["Metric_Type"].unique():
                 df_metric = player_df[player_df["Metric_Type"] == metric]
                 if len(df_metric) > 1:
-                    fig_line = px.line(df_metric, x="Date", y="Average", title=f"{metric} Progress", markers=True)
+                    fig_line = px.line(
+                        df_metric,
+                        x="Date",
+                        y="Average",
+                        title=f"{metric} Progress",
+                        markers=True,
+                        text="Average"  # ✅ Add value labels
+                    )
+                    # ✅ Position labels slightly above the points
+                    fig_line.update_traces(textposition="top center")
                     st.plotly_chart(fig_line, use_container_width=True)
+
 
             # Raw Data
             st.subheader("Raw Data")
@@ -193,21 +205,25 @@ with tab2:
             # Build comparison bar chart
             fig_bar = go.Figure()
             
-            # Add team average bar
+            # Add team average bar with data label
             fig_bar.add_trace(go.Bar(
                 x=["Team Average"],
                 y=[metric_data["Average"]],
                 name="Team Average",
-                marker_color="blue"
+                marker_color="blue",
+                text=[f"{metric_data['Average']:.2f}"],  # ✅ Show value as text
+                textposition="outside"                   # ✅ Position label outside bar
             ))
             
-            # Add target bar (only if exists)
+            # Add target bar (only if exists) with data label
             if pd.notna(metric_data["Target"]):
                 fig_bar.add_trace(go.Bar(
                     x=["Target"],
                     y=[metric_data["Target"]],
                     name="Target",
-                    marker_color="green"
+                    marker_color="green",
+                    text=[f"{metric_data['Target']:.2f}"],  # ✅ Show value as text
+                    textposition="outside"
                 ))
             
             fig_bar.update_layout(
@@ -217,7 +233,6 @@ with tab2:
             )
             
             st.plotly_chart(fig_bar, use_container_width=True)
-
 
 
             # Team leaderboard (all metrics, not just those with targets)
