@@ -69,12 +69,9 @@ with col1:
 with col2:
     st.markdown("""
         <div style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
-            <h1 style="margin-bottom: 0;">LCB Training - Player Development</h1>
-            <p style="font-size: 18px; margin-top: 0; color: gray;">
-                "Helping Athletes Build Strength, Skill, and Confidence On and Off the Field"
-            </p>
-            <p style="font-size: 14px; margin-top: 0;">
-                Hitting • Fielding • Pitching • Speed & Agility
+            <h1 style="margin-bottom: 0;">LCB Training</h1>
+            <p style="font-size: 24px; margin-top: 0; color: gray;">
+                All-Around Player Development - Helping Athletes Build Strength, Skill, and Confidence On and Off the Field
             </p>
         </div>
     """, unsafe_allow_html=True)
