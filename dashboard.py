@@ -103,7 +103,6 @@ if not st.session_state.logged_in:
             st.session_state.logged_in = True
             st.session_state.user_role = user_type
             st.session_state.selected_player = player_name
-            st.experimental_rerun()  # Refresh app to show tabs
         else:
             st.error("Invalid access code. Please try again.")
 
