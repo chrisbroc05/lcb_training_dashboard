@@ -6,6 +6,22 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ========================
+# Login / Access Control
+# ========================
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.user_role = None
+    st.session_state.selected_player = None
+
+# Dictionary of access codes (replace with your real codes)
+ACCESS_CODES = {
+    "player1": "PLAYER123",
+    "parent1": "PARENT123",
+    "coach": "COACH123"
+}
+
+
+# ========================
 # 1. Load Google Sheets Data
 # ========================
 @st.cache_data
@@ -57,6 +73,44 @@ targets = {
 }
 
 # ========================
+# Log In Logic
+# ========================
+if not st.session_state.logged_in:
+    st.title("Welcome to LCB Training Portal")
+    st.write("Please sign in to continue.")
+
+    user_type = st.selectbox("Select your role:", ["Player", "Parent", "Coach"])
+
+    access_code = st.text_input("Enter your access code", type="password")
+
+    player_name = None
+    if user_type in ["Player", "Parent"]:
+        # Show dropdown of players
+        players = sorted(df["full_name"].dropna().unique())
+        player_name = st.selectbox("Select Player", players)
+
+    if st.button("Login"):
+        # Simple validation
+        code_valid = False
+        if user_type == "Coach" and access_code == ACCESS_CODES.get("coach"):
+            code_valid = True
+        elif user_type == "Player" and access_code == ACCESS_CODES.get("player1"):
+            code_valid = True
+        elif user_type == "Parent" and access_code == ACCESS_CODES.get("parent1"):
+            code_valid = True
+
+        if code_valid:
+            st.session_state.logged_in = True
+            st.session_state.user_role = user_type
+            st.session_state.selected_player = player_name
+            st.experimental_rerun()  # Refresh app to show tabs
+        else:
+            st.error("Invalid access code. Please try again.")
+
+    st.stop()  # Stop the app here until user logs in
+
+
+# ========================
 # Main Layout – Add Logo & Branding
 # ========================
 
@@ -85,7 +139,12 @@ tab1, tab2, tab3 = st.tabs(["👤 Players", "👥 Teams", "🏆 Leaderboard"])
 with tab1:
     st.title("Player Insights")
     players = sorted(df["full_name"].dropna().unique())
+    # Use session state from login for Player/Parent
+if st.session_state.user_role in ["Player", "Parent"]:
+    selected_player = st.session_state.selected_player
+else:
     selected_player = st.selectbox("Select Player", players)
+
 
     if selected_player:
         player_df = df[df["full_name"] == selected_player]
