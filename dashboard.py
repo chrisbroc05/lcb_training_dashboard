@@ -62,152 +62,63 @@ st.title("LCB Training Dashboard")
 tab1, tab2, tab3 = st.tabs(["👤 Player", "👥 Team", "🏆 Leaderboard"])
 
 # ========================
-# Players Tab
+# Player Tab
 # ========================
 with tab1:
-    st.title("Player Insights")
+    st.header("Player Dashboard")
     players = sorted(df["full_name"].dropna().unique())
     selected_player = st.selectbox("Select Player", players)
 
-    if selected_player:
-        player_df = df[df["full_name"] == selected_player]
+    player_df = df[df["full_name"] == selected_player]
 
-        if not player_df.empty:
-            # Profile Card
-            player_age = player_df["Age"].iloc[0]
-            player_team = player_df["Team"].iloc[0]
-            total_sessions = player_df["Date"].nunique()
+    if not player_df.empty:
+        player_age = player_df["Age"].iloc[0]
+        age_group = get_age_group(player_age)
+        st.subheader(f"{selected_player} ({age_group})")
 
-            st.markdown(f"""
-            <div style="background-color:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:10px;color:black;">
-                <h3 style="color:black;">{selected_player}</h3>
-                <p><b>Team:</b> {player_team}</p>
-                <p><b>Age:</b> {player_age} ({get_age_group(player_age)})</p>
-                <p><b>Total Sessions:</b> {total_sessions}</p>
-            </div>
-            """, unsafe_allow_html=True)
+        # Table: First, Last, Best, Growth, Goal
+        table_data = []
+        for metric in player_df["Metric_Type"].unique():
+            df_metric = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
+            first_result = df_metric["Average"].iloc[0]
+            last_result = df_metric["Average"].iloc[-1]
+            best_result = df_metric["Average"].max() if metric not in lower_is_better else df_metric["Average"].min()
+            growth = last_result - first_result if metric not in lower_is_better else first_result - last_result
+            goal = targets.get(age_group, {}).get(metric, None)
+            table_data.append({
+                "Metric": metric,
+                "First Result": first_result,
+                "Last Result": last_result,
+                "Best Result": best_result,
+                "Growth": growth,
+                "Goal": goal
+            })
+        df_table = pd.DataFrame(table_data)
+        st.dataframe(df_table)
 
-            # ========================
-            # Player Metric Summary Table
-            # ========================
-            st.subheader("Performance Summary")
+        # Best values chart
+        fig_best = px.bar(df_table, x="Metric", y="Best Result", text="Best Result")
+        st.plotly_chart(fig_best, use_container_width=True)
 
-            summary_rows = []
-            age_targets = targets.get(get_age_group(player_age), {})
+        # Line graphs
+        strength_metrics = [m for m in player_df["Metric_Type"].unique() if m not in lower_is_better]
+        speed_metrics = [m for m in player_df["Metric_Type"].unique() if m in lower_is_better]
 
-            for metric in player_df["Metric_Type"].unique():
+        if strength_metrics:
+            fig_strength = go.Figure()
+            for metric in strength_metrics:
                 df_m = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
+                fig_strength.add_trace(go.Scatter(x=df_m["Date"], y=df_m["Average"], mode="lines+markers", name=metric))
+            fig_strength.update_layout(title="Strength Metrics Progress")
+            st.plotly_chart(fig_strength, use_container_width=True)
 
-                first_result = df_m["Average"].iloc[0]
-                last_result = df_m["Average"].iloc[-1]
-
-                is_lower_better = metric in lower_is_better
-                best_result = df_m["Average"].min() if is_lower_better else df_m["Average"].max()
-                goal_value = age_targets.get(metric, None)
-
-                # Calculate Growth
-                growth = (last_result - best_result) if not is_lower_better else (best_result - last_result)
-
-                summary_rows.append({
-                    "Metric": metric,
-                    "First Result": round(first_result, 2),
-                    "Last Result": round(last_result, 2),
-                    "Best Result": round(best_result, 2),
-                    "Growth": round(growth, 2),
-                    "Goal": goal_value
-                })
-
-            df_summary = pd.DataFrame(summary_rows)
-            st.dataframe(df_summary)
-
-            # ========================
-            # Gauges vs Targets
-            # ========================
-            st.subheader("Performance vs Targets")
-
-            for metric in player_df["Metric_Type"].unique():
-                if metric in age_targets:
-                    df_m = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
-                    current_value = df_m["Average"].iloc[-1]
-                    target_value = age_targets[metric]
-                    is_lower_better = metric in lower_is_better
-                    axis_range = [0, target_value * 1.5]
-
-                    # Configure delta color behavior
-                    delta_config = {
-                        "reference": target_value,
-                        "increasing": {"color": "red" if is_lower_better else "green"},
-                        "decreasing": {"color": "green" if is_lower_better else "red"},
-                    }
-
-                    fig = go.Figure(go.Indicator(
-                        mode="gauge+number+delta",
-                        value=current_value,
-                        delta=delta_config,
-                        title={"text": metric},
-                        gauge={
-                            "axis": {"range": axis_range},
-                            "bar": {"color": "blue"},
-                            "steps": [
-                                {"range": [0, target_value],
-                                 "color": "lightgreen" if not is_lower_better else "lightcoral"},
-                                {"range": [target_value, axis_range[1]],
-                                 "color": "lightcoral" if not is_lower_better else "lightgreen"},
-                            ],
-                            "threshold": {
-                                "line": {"color": "black", "width": 4},
-                                "thickness": 0.75,
-                                "value": target_value
-                            }
-                        }
-                    ))
-                    st.plotly_chart(fig, use_container_width=True)
-
-            # ========================
-            # Progress Over Time
-            # ========================
-            st.subheader("Progress Over Time")
-
-            endurance_metrics = ["Push Ups", "Wall Sit", "Plank"]
-            other_metrics = [m for m in player_df["Metric_Type"].unique() if m not in endurance_metrics]
-
-            # Separate out other metrics
-            for metric in other_metrics:
-                df_metric = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
-                if len(df_metric) > 1:
-                    fig_line = px.line(
-                        df_metric,
-                        x="Date",
-                        y="Average",
-                        title=f"{metric} Progress",
-                        markers=True,
-                        text="Average"
-                    )
-                    fig_line.update_traces(textposition="top center")
-                    st.plotly_chart(fig_line, use_container_width=True)
-
-            # Endurance chart (if available)
-            df_endurance = player_df[player_df["Metric_Type"].isin(endurance_metrics)]
-            if not df_endurance.empty:
-                st.subheader("Endurance Metrics Progress")
-
-                fig_endurance = px.line(
-                    df_endurance,
-                    x="Date",
-                    y="Average",
-                    color="Metric_Type",
-                    markers=True,
-                    text="Average",
-                    title="Endurance Metrics Over Time"
-                )
-                fig_endurance.update_traces(textposition="top center")
-                st.plotly_chart(fig_endurance, use_container_width=True)
-
-            # ========================
-            # Raw Data
-            # ========================
-            st.subheader("Raw Data")
-            st.dataframe(player_df)
+        if speed_metrics:
+            fig_speed = go.Figure()
+            for metric in speed_metrics:
+                df_m = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
+                fig_speed.add_trace(go.Scatter(x=df_m["Date"], y=df_m["Average"], mode="lines+markers", name=metric))
+            fig_speed.update_layout(title="Speed Metrics Progress")
+            st.plotly_chart(fig_speed, use_container_width=True)
 
 # ========================
 # Team Tab
@@ -267,6 +178,10 @@ with tab3:
 
         st.write(f"### Top {len(df_best)} Players - {leaderboard_metric}")
         st.dataframe(df_best)
+
+        fig_leader = px.bar(df_best, x="full_name", y="best_score", color="full_name", text="best_score", title=f"Leaderboard - {leaderboard_metric}")
+        fig_leader.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+        st.plotly_chart(fig_leader, use_container_width=True)
 
         fig_leader = px.bar(df_best, x="full_name", y="best_score", color="full_name", text="best_score", title=f"Leaderboard - {leaderboard_metric}")
         fig_leader.update_traces(texttemplate='%{text:.2f}', textposition='outside')
