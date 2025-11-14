@@ -300,38 +300,59 @@ def get_metric_summary(df, metric):
     return first, best, growth
 
 
-# ----- Styled KPI Card Function -----
 def metric_card(metric, first, best, growth):
-    color = "#6AA84F" if growth > 0 else "red"
+    # Determine color for growth (green for improvement, red for decline)
+    color = "#6AA84F" if growth > 0 else "#CC0000"
     growth_str = f"{growth:.2f}"
 
     return f"""
     <div style="
-        background:white;
-        border-radius:14px;
-        padding:18px;
-        margin-top:10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        border-left: 6px solid #1155CC;
-        text-align:center;
+        background: #FFFFFF;
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin-top: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.09);
+        border: 1px solid #E6E6E6;
+        position: relative;
     ">
-        <div style="font-size:18px; font-weight:600; color:#1155CC; margin-bottom:6px;">
+        <!-- Highlight top bar -->
+        <div style="
+            height: 6px;
+            width: 100%;
+            background: {color};
+            border-radius: 16px 16px 0 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+        "></div>
+
+        <!-- Metric Title -->
+        <div style="font-size: 18px; font-weight: 700; color: #1155CC; margin-bottom: 10px;">
             {metric}
         </div>
 
-        <div style="font-size:15px; color:#222;">
+        <!-- First Result -->
+        <div style="font-size: 15px; color: #333;">
             First: <b>{first:.2f}</b>
         </div>
 
-        <div style="font-size:15px; color:#222;">
+        <!-- Best Result -->
+        <div style="font-size: 15px; color: #333; margin-top: 4px;">
             Best: <b>{best:.2f}</b>
         </div>
 
-        <div style="font-size:16px; font-weight:700; color:{color}; margin-top:6px;">
+        <!-- Growth Highlight -->
+        <div style="
+            margin-top: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            color: {color};
+        ">
             Growth: {growth_str}
         </div>
     </div>
     """
+
 
 
 # ==============================
