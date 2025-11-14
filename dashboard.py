@@ -267,20 +267,137 @@ st.dataframe(
 
 
 # =========================
-# TREND CHARTS
+# PERFORMANCE TRENDS
 # =========================
 st.markdown("### 📈 Performance Trends")
 
-for metric in player_df["Metric_Type"].unique():
-    df_m = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
-    fig = px.line(
-        df_m, x="Date", y="Average",
-        markers=True,
-        title=f"{metric} Progress Over Time"
-    )
-    fig.update_layout(height=350)
-    st.plotly_chart(fig, use_container_width=True)
+# --- Metric Groups ---
+baseball_metrics = [
+    "Arm Speed - Pitch", "Arm Speed - Reg",
+    "BES - Flip", "BES - Tee"
+]
 
+speed_metrics = [
+    "10 Yard Sprint", "Pro Agility"
+]
+
+# Helper function to compute summary for cards
+def get_metric_summary(df, metric):
+    mdf = df[df["Metric_Type"] == metric].sort_values("Date")
+    if mdf.empty:
+        return None, None, None
+
+    first = mdf["Average"].iloc[0]
+    latest = mdf["Average"].iloc[-1]
+
+    if metric in lower_is_better:
+        best = mdf["Average"].min()
+        growth = first - best   # lower = better
+    else:
+        best = mdf["Average"].max()
+        growth = best - first   # higher = better
+
+    return first, best, growth
+
+
+# ==============================
+# BASEBALL PERFORMANCE TRENDS
+# ==============================
+st.markdown("#### ⚾ Baseball Performance Metrics")
+
+df_baseball = player_df[player_df["Metric_Type"].isin(baseball_metrics)]
+
+if not df_baseball.empty:
+    fig1 = px.line(
+        df_baseball.sort_values("Date"),
+        x="Date", y="Average", color="Metric_Type",
+        markers=True,
+        title="Baseball Performance Over Time"
+    )
+    fig1.update_layout(height=350, legend_title_text="Metric")
+    st.plotly_chart(fig1, use_container_width=True)
+
+    # Cards for baseball metrics
+    card_cols = st.columns(4)
+    for i, metric in enumerate(baseball_metrics):
+        first, best, growth = get_metric_summary(player_df, metric)
+
+        if first is None:
+            continue
+
+        color = "green" if growth > 0 else "red"
+        growth_str = f"{growth:.2f}"
+
+        with card_cols[i % 4]:
+            st.markdown(
+                f"""
+                <div style="
+                    border:1px solid #ccc;
+                    border-radius:10px;
+                    padding:10px;
+                    margin-top:10px;
+                    text-align:center;
+                ">
+                    <h4 style="margin:0; font-size:18px;">{metric}</h4>
+                    <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
+                    <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
+                    <p style="margin:4px 0; color:{color};">
+                        Growth: <b>{growth_str}</b>
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+# ==============================
+# SPEED / AGILITY PERFORMANCE
+# ==============================
+st.markdown("#### 🏃 Speed & Agility Metrics")
+
+df_speed = player_df[player_df["Metric_Type"].isin(speed_metrics)]
+
+if not df_speed.empty:
+    fig2 = px.line(
+        df_speed.sort_values("Date"),
+        x="Date", y="Average", color="Metric_Type",
+        markers=True,
+        title="Speed & Agility Performance Over Time"
+    )
+    fig2.update_layout(height=350, legend_title_text="Metric")
+    st.plotly_chart(fig2, use_container_width=True)
+
+    # Cards for speed metrics
+    card_cols2 = st.columns(2)
+    for i, metric in enumerate(speed_metrics):
+        first, best, growth = get_metric_summary(player_df, metric)
+
+        if first is None:
+            continue
+
+        color = "green" if growth > 0 else "red"
+        growth_str = f"{growth:.2f}"
+
+        with card_cols2[i % 2]:
+            st.markdown(
+                f"""
+                <div style="
+                    border:1px solid #ccc;
+                    border-radius:10px;
+                    padding:10px;
+                    margin-top:10px;
+                    text-align:center;
+                ">
+                    <h4 style="margin:0; font-size:18px;">{metric}</h4>
+                    <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
+                    <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
+                    <p style="margin:4px 0; color:{color};">
+                        Growth: <b>{growth_str}</b>
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 # =============================================================
 # --------------------- TEAM TAB ------------------------------
