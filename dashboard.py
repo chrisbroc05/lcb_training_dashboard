@@ -5,6 +5,8 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 from PIL import Image
+import base64
+from io import BytesIO
 
 # =========================
 # LOAD GOOGLE SHEETS
@@ -38,7 +40,7 @@ def load_data():
 df = load_data()
 
 # =========================
-# HELPER FUNCTIONS
+# CONFIG
 # =========================
 lower_is_better = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
 
@@ -58,7 +60,7 @@ def get_age_group(age):
     return "16U"
 
 # =========================
-# GLOBAL PAGE STYLING
+# GLOBAL STYLE
 # =========================
 st.markdown("""
 <style>
@@ -75,7 +77,7 @@ st.markdown("""
 
 /* LOGO */
 .header-logo {
-    width: 80px;
+    width: 55px;  /* Smaller logo */
     margin-right: 20px;
 }
 
@@ -83,14 +85,21 @@ st.markdown("""
 .header-text h1 {
     color: white;
     margin: 0;
-    font-size: 34px;
+    font-size: 32px;
     font-weight: 700;
 }
 
 .header-text p {
     color: #cccccc;
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
+}
+
+/* SLOGAN */
+.header-text .slogan {
+    color: #bbbbbb;
+    margin-top: 6px;
+    font-size: 13px;
 }
 
 /* CARD */
@@ -126,25 +135,33 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================
-# HEADER WITH LOGO
+# HEADER WITH LOGO + SLOGAN
 # =========================
+def image_to_base64(img):
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode()
+
 try:
     logo = Image.open("lcb training logo.png")
+    logo_b64 = image_to_base64(logo)
+
     st.markdown(
         f"""
         <div class="header-wrapper">
-            <img src="data:image/png;base64,{st.image(logo, output_format='PNG').image_to_bytes().hex()}" 
-            class="header-logo">
+            <img src="data:image/png;base64,{logo_b64}" class="header-logo">
             <div class="header-text">
                 <h1>LCB Training Performance Dashboard</h1>
                 <p>Elite Player Development • Strength • Speed • Confidence</p>
+                <p class="slogan">Elite Baseball Training for Teams and Players — Helping Athletes Build Strength, Skill, and Confidence On and Off the Field</p>
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 except:
-    st.warning("Logo not found — make sure 'lcb training logo.png' is in the project folder.")
+    st.warning("Logo not found — make sure 'lcb training logo.png' is present.")
+
 
 # =========================
 # TABS
@@ -167,15 +184,19 @@ with tab1:
         if player_df.empty:
             st.info("No records found for this player.")
         else:
-            # Player info
-            player_age = int(player_df["Age"].dropna().iloc[0]) if not player_df["Age"].dropna().empty else None
+            # ---------------------------
+            # GET MOST RECENT PLAYER INFO
+            # ---------------------------
+            most_recent = player_df.sort_values("Date").iloc[-1]
+            player_age = int(most_recent["Age"]) if not pd.isna(most_recent["Age"]) else None
+            player_team = most_recent["Team"] if str(most_recent["Team"]) != "nan" else "N/A"
             age_group = get_age_group(player_age) if player_age else "N/A"
-            player_team = player_df["Team"].dropna().iloc[0] if not player_df["Team"].dropna().empty else "N/A"
 
-            # Summary Header
+            # ---------------------------
+            # PLAYER SUMMARY
+            # ---------------------------
             st.markdown("<h3 style='margin-bottom:10px'>📊 Player Summary</h3>", unsafe_allow_html=True)
 
-            # KPI Row
             colA, colB, colC = st.columns(3)
             colA.markdown(f"<div class='kpi'><h4>Player</h4><b>{selected_player}</b></div>", unsafe_allow_html=True)
             colB.markdown(f"<div class='kpi'><h4>Team</h4><b>{player_team}</b></div>", unsafe_allow_html=True)
@@ -183,8 +204,46 @@ with tab1:
 
             st.markdown("<hr>", unsafe_allow_html=True)
 
-            # ========= BEST SCORES TABLE =========
+            # =====================================================
+            # RESULTS SUMMARY TABLE (FIRST, LATEST, BEST, GROWTH)
+            # =====================================================
+            st.markdown("### 📘 Results Summary")
+
+            rows = []
+            for metric in player_df["Metric_Type"].unique():
+                mdf = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
+
+                first = mdf["Average"].iloc[0]
+                latest = mdf["Average"].iloc[-1]
+
+                if metric in lower_is_better:
+                    best = mdf["Average"].min()
+                    growth = first - best  # improvement = decrease
+                else:
+                    best = mdf["Average"].max()
+                    growth = best - first  # improvement = increase
+
+                goal = targets.get(age_group, {}).get(metric, None)
+
+                rows.append({
+                    "Metric": metric,
+                    "First": first,
+                    "Latest": latest,
+                    "Best": best,
+                    "Growth": growth,
+                    "Goal": goal
+                })
+
+            summary_df = pd.DataFrame(rows)
+            st.dataframe(summary_df.style.format("{:.2f}"), use_container_width=True)
+
+            st.markdown("<hr>", unsafe_allow_html=True)
+
+            # =========================
+            # BEST PERFORMANCES TABLE
+            # =========================
             st.markdown("### 🏅 Best Performance by Metric")
+
             summary_data = []
             for metric in player_df["Metric_Type"].unique():
                 df_metric = player_df[player_df["Metric_Type"] == metric]
@@ -194,7 +253,9 @@ with tab1:
             best_df = pd.DataFrame(summary_data)
             st.dataframe(best_df.style.format({"Best Score": "{:.2f}"}), use_container_width=True)
 
-            # ========= TREND CHARTS =========
+            # =========================
+            # TREND CHARTS
+            # =========================
             st.markdown("### 📈 Performance Trends")
 
             for metric in player_df["Metric_Type"].unique():
@@ -221,12 +282,11 @@ with tab2:
 
     if selected_team:
         team_df = df[df["Team"] == selected_team]
-
-        if team_df.empty:
-            st.warning("No team data found.")
-        else:
+        if not team_df.empty:
             avg_age = round(team_df["Age"].mean(), 2)
             st.write(f"**Avg Age:** {avg_age}")
+        else:
+            st.warning("No team data found.")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -251,3 +311,4 @@ with tab3:
     st.dataframe(df_metric.head(15), use_container_width=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
+
