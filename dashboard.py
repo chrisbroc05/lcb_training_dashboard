@@ -300,8 +300,42 @@ def get_metric_summary(df, metric):
     return first, best, growth
 
 
+# ----- Styled KPI Card Function -----
+def metric_card(metric, first, best, growth):
+    color = "#6AA84F" if growth > 0 else "red"
+    growth_str = f"{growth:.2f}"
+
+    return f"""
+    <div style="
+        background:white;
+        border-radius:14px;
+        padding:18px;
+        margin-top:10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        border-left: 6px solid #1155CC;
+        text-align:center;
+    ">
+        <div style="font-size:18px; font-weight:600; color:#1155CC; margin-bottom:6px;">
+            {metric}
+        </div>
+
+        <div style="font-size:15px; color:#222;">
+            First: <b>{first:.2f}</b>
+        </div>
+
+        <div style="font-size:15px; color:#222;">
+            Best: <b>{best:.2f}</b>
+        </div>
+
+        <div style="font-size:16px; font-weight:700; color:{color}; margin-top:6px;">
+            Growth: {growth_str}
+        </div>
+    </div>
+    """
+
+
 # ==============================
-# BASEBALL PERFORMANCE TRENDS
+# BASEBALL PERFORMANCE
 # ==============================
 st.markdown("#### ⚾ Baseball Performance Metrics")
 
@@ -317,37 +351,16 @@ if not df_baseball.empty:
     fig1.update_layout(height=350, legend_title_text="Metric")
     st.plotly_chart(fig1, use_container_width=True)
 
-    # Cards for baseball metrics
+    st.markdown("### Baseball Metric Improvements")
+
     card_cols = st.columns(4)
     for i, metric in enumerate(baseball_metrics):
         first, best, growth = get_metric_summary(player_df, metric)
-
         if first is None:
             continue
 
-        color = "green" if growth > 0 else "red"
-        growth_str = f"{growth:.2f}"
-
         with card_cols[i % 4]:
-            st.markdown(
-                f"""
-                <div style="
-                    border:1px solid #ccc;
-                    border-radius:10px;
-                    padding:10px;
-                    margin-top:10px;
-                    text-align:center;
-                ">
-                    <h4 style="margin:0; font-size:18px;">{metric}</h4>
-                    <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
-                    <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
-                    <p style="margin:4px 0; color:{color};">
-                        Growth: <b>{growth_str}</b>
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.markdown(metric_card(metric, first, best, growth), unsafe_allow_html=True)
 
 
 # ==============================
@@ -367,37 +380,17 @@ if not df_speed.empty:
     fig2.update_layout(height=350, legend_title_text="Metric")
     st.plotly_chart(fig2, use_container_width=True)
 
-    # Cards for speed metrics
+    st.markdown("### Speed & Agility Metric Improvements")
+
     card_cols2 = st.columns(2)
     for i, metric in enumerate(speed_metrics):
         first, best, growth = get_metric_summary(player_df, metric)
-
         if first is None:
             continue
 
-        color = "green" if growth > 0 else "red"
-        growth_str = f"{growth:.2f}"
-
         with card_cols2[i % 2]:
-            st.markdown(
-                f"""
-                <div style="
-                    border:1px solid #ccc;
-                    border-radius:10px;
-                    padding:10px;
-                    margin-top:10px;
-                    text-align:center;
-                ">
-                    <h4 style="margin:0; font-size:18px;">{metric}</h4>
-                    <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
-                    <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
-                    <p style="margin:4px 0; color:{color};">
-                        Growth: <b>{growth_str}</b>
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.markdown(metric_card(metric, first, best, growth), unsafe_allow_html=True)
+
 
 # =============================================================
 # --------------------- TEAM TAB ------------------------------
