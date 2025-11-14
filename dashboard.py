@@ -302,11 +302,9 @@ def get_metric_summary(df, metric):
 
 # ----- Styled KPI Card Function -----
 def metric_card(metric, first, best, growth):
-    # Determine color based on growth (green if positive, red if negative)
     color = "#6AA84F" if growth > 0 else "red"
     growth_str = f"{growth:.2f}"
 
-    # Return clean HTML string
     card_html = f"""
     <div style="
         background: #FFFFFF;
@@ -317,22 +315,18 @@ def metric_card(metric, first, best, growth):
         border-left: 6px solid #1155CC;
         text-align: center;
     ">
-        <!-- Metric Title -->
         <div style="font-size: 18px; font-weight: 700; color: #1155CC; margin-bottom: 6px;">
             {metric}
         </div>
 
-        <!-- First Result -->
         <div style="font-size: 15px; color: #333;">
             First: <b>{first:.2f}</b>
         </div>
 
-        <!-- Best Result -->
         <div style="font-size: 15px; color: #333; margin-top: 4px;">
             Best: <b>{best:.2f}</b>
         </div>
 
-        <!-- Growth Highlight -->
         <div style="
             margin-top: 10px;
             font-size: 17px;
@@ -344,6 +338,7 @@ def metric_card(metric, first, best, growth):
     </div>
     """
     return card_html
+
 
 
 # ==============================
