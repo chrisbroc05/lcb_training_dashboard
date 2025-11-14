@@ -300,34 +300,25 @@ def get_metric_summary(df, metric):
     return first, best, growth
 
 
+# ----- Styled KPI Card Function -----
 def metric_card(metric, first, best, growth):
-    # Determine color for growth (green for improvement, red for decline)
-    color = "#6AA84F" if growth > 0 else "#CC0000"
+    # Determine color based on growth (green if positive, red if negative)
+    color = "#6AA84F" if growth > 0 else "red"
     growth_str = f"{growth:.2f}"
 
-    return f"""
+    # Return clean HTML string
+    card_html = f"""
     <div style="
         background: #FFFFFF;
-        border-radius: 16px;
-        padding: 16px 20px;
-        margin-top: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.09);
-        border: 1px solid #E6E6E6;
-        position: relative;
+        border-radius: 14px;
+        padding: 18px;
+        margin-top: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        border-left: 6px solid #1155CC;
+        text-align: center;
     ">
-        <!-- Highlight top bar -->
-        <div style="
-            height: 6px;
-            width: 100%;
-            background: {color};
-            border-radius: 16px 16px 0 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-        "></div>
-
         <!-- Metric Title -->
-        <div style="font-size: 18px; font-weight: 700; color: #1155CC; margin-bottom: 10px;">
+        <div style="font-size: 18px; font-weight: 700; color: #1155CC; margin-bottom: 6px;">
             {metric}
         </div>
 
@@ -352,7 +343,7 @@ def metric_card(metric, first, best, growth):
         </div>
     </div>
     """
-
+    return card_html
 
 
 # ==============================
@@ -375,13 +366,13 @@ if not df_baseball.empty:
     st.markdown("### Baseball Metric Improvements")
 
     card_cols = st.columns(4)
-    for i, metric in enumerate(baseball_metrics):
-        first, best, growth = get_metric_summary(player_df, metric)
-        if first is None:
-            continue
+for i, metric in enumerate(baseball_metrics):
+    first, best, growth = get_metric_summary(player_df, metric)
+    if first is None:
+        continue
 
-        with card_cols[i % 4]:
-            st.markdown(metric_card(metric, first, best, growth), unsafe_allow_html=True)
+    with card_cols[i % 4]:
+        st.markdown(metric_card(metric, first, best, growth), unsafe_allow_html=True)
 
 
 # ==============================
