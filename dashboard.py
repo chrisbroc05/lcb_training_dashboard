@@ -151,33 +151,33 @@ colC.markdown(f"<div class='kpi'><h4>Age Group</h4><b>{age_group}</b></div>", un
 
 st.markdown("<hr style='margin:12px 0;'>", unsafe_allow_html=True)
 
-            # ==========================
-            # Best Scores summary table
-            # ==========================
-            st.markdown("<h4 style='margin-top:0'>🏅 Best Performance by Metric</h4>", unsafe_allow_html=True)
-            
-            summary_data = []
-            for metric in player_df["Metric_Type"].unique():
-                df_metric = player_df[player_df["Metric_Type"] == metric]
-            
-                # Best result depends on whether low is better
-                best_result = (
-                    df_metric["Average"].min() if metric in lower_is_better
-                    else df_metric["Average"].max()
-                )
-            
-                summary_data.append({"Metric": metric, "Best Score": best_result})
-            
-            summary_df = pd.DataFrame(summary_data)
-            
-            # Render summary (clean table)
-            st.dataframe(
-                summary_df.style.format({"Best Score": "{:.2f}"})
-                                 .set_properties(**{"text-align": "center"}),
-                use_container_width=True
-            )
-            
-            st.markdown("</div>", unsafe_allow_html=True)
+# ==========================
+# Best Scores summary table
+# ==========================
+st.markdown("<h4 style='margin-top:0'>🏅 Best Performance by Metric</h4>", unsafe_allow_html=True)
+
+summary_data = []
+for metric in player_df["Metric_Type"].unique():
+    df_metric = player_df[player_df["Metric_Type"] == metric]
+
+    # Best result depends on whether low is better
+    best_result = (
+        df_metric["Average"].min() if metric in lower_is_better
+        else df_metric["Average"].max()
+    )
+
+    summary_data.append({"Metric": metric, "Best Score": best_result})
+
+summary_df = pd.DataFrame(summary_data)
+
+# Render summary (clean table)
+st.dataframe(
+    summary_df.style.format({"Best Score": "{:.2f}"})
+                     .set_properties(**{"text-align": "center"}),
+    use_container_width=True
+)
+
+st.markdown("</div>", unsafe_allow_html=True)
 
             # Build summary table per metric: First, Last, Best, Growth (last - best), Goal
             metrics = player_df["Metric_Type"].dropna().unique().tolist()
