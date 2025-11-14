@@ -366,13 +366,13 @@ if not df_baseball.empty:
     st.markdown("### Baseball Metric Improvements")
 
     card_cols = st.columns(4)
-for i, metric in enumerate(baseball_metrics):
-    first, best, growth = get_metric_summary(player_df, metric)
-    if first is None:
-        continue
+    for i, metric in enumerate(baseball_metrics):  # <-- indent this inside the if
+        first, best, growth = get_metric_summary(player_df, metric)
+        if first is None:
+            continue
 
-    with card_cols[i % 4]:
-        st.markdown(metric_card(metric, first, best, growth), unsafe_allow_html=True)
+        with card_cols[i % 4]:
+            st.markdown(metric_card(metric, first, best, growth), unsafe_allow_html=True)
 
 
 # ==============================
@@ -395,7 +395,7 @@ if not df_speed.empty:
     st.markdown("### Speed & Agility Metric Improvements")
 
     card_cols2 = st.columns(2)
-    for i, metric in enumerate(speed_metrics):
+    for i, metric in enumerate(speed_metrics):  # <-- indent here as well
         first, best, growth = get_metric_summary(player_df, metric)
         if first is None:
             continue
