@@ -205,72 +205,82 @@ with tab1:
             st.markdown("<hr>", unsafe_allow_html=True)
 
             # =====================================================
-            # RESULTS SUMMARY TABLE (FIRST, LATEST, BEST, GROWTH)
-            # =====================================================
-            st.markdown("### 📘 Results Summary")
+# RESULTS SUMMARY TABLE (FIRST, LATEST, BEST, GROWTH)
+# =====================================================
+st.markdown("### 📘 Results Summary")
 
-            rows = []
-            for metric in player_df["Metric_Type"].unique():
-                mdf = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
+rows = []
+for metric in player_df["Metric_Type"].unique():
+    mdf = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
 
-                first = mdf["Average"].iloc[0]
-                latest = mdf["Average"].iloc[-1]
+    first = mdf["Average"].iloc[0]
+    latest = mdf["Average"].iloc[-1]
 
-                if metric in lower_is_better:
-                    best = mdf["Average"].min()
-                    growth = first - best  # improvement = decrease
-                else:
-                    best = mdf["Average"].max()
-                    growth = best - first  # improvement = increase
+    if metric in lower_is_better:
+        best = mdf["Average"].min()
+        growth = first - best  # improvement = decrease
+    else:
+        best = mdf["Average"].max()
+        growth = best - first  # improvement = increase
 
-                goal = targets.get(age_group, {}).get(metric, None)
+    goal = targets.get(age_group, {}).get(metric, None)
 
-                rows.append({
-                    "Metric": metric,
-                    "First": first,
-                    "Latest": latest,
-                    "Best": best,
-                    "Growth": growth,
-                    "Goal": goal
-                })
+    rows.append({
+        "Metric": metric,
+        "First": first,
+        "Latest": latest,
+        "Best": best,
+        "Growth": growth,
+        "Goal": goal
+    })
 
-            summary_df = pd.DataFrame(rows)
-            st.dataframe(summary_df.style.format("{:.2f}"), use_container_width=True)
+summary_df = pd.DataFrame(rows)
 
-            st.markdown("<hr>", unsafe_allow_html=True)
+# ---- FIXED: Format only the numeric columns ----
+numeric_cols = ["First", "Latest", "Best", "Growth", "Goal"]
+format_dict = {col: "{:.2f}" for col in numeric_cols if col in summary_df.columns}
 
-            # =========================
-            # BEST PERFORMANCES TABLE
-            # =========================
-            st.markdown("### 🏅 Best Performance by Metric")
+st.dataframe(summary_df.style.format(format_dict), use_container_width=True)
 
-            summary_data = []
-            for metric in player_df["Metric_Type"].unique():
-                df_metric = player_df[player_df["Metric_Type"] == metric]
-                best_score = df_metric["Average"].min() if metric in lower_is_better else df_metric["Average"].max()
-                summary_data.append({"Metric": metric, "Best Score": best_score})
+st.markdown("<hr>", unsafe_allow_html=True)
 
-            best_df = pd.DataFrame(summary_data)
-            best_df["Best Score"] = pd.to_numeric(best_df["Best Score"], errors="coerce")
-            st.dataframe(best_df.style.format({"Best Score": lambda x: f"{x:.2f}" if pd.notnull(x) else "N/A"}), 
-             use_container_width=True)
 
-            # =========================
-            # TREND CHARTS
-            # =========================
-            st.markdown("### 📈 Performance Trends")
+# =========================
+# BEST PERFORMANCES TABLE
+# =========================
+st.markdown("### 🏅 Best Performance by Metric")
 
-            for metric in player_df["Metric_Type"].unique():
-                df_m = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
-                fig = px.line(
-                    df_m, x="Date", y="Average",
-                    markers=True,
-                    title=f"{metric} Progress Over Time"
-                )
-                fig.update_layout(height=350)
-                st.plotly_chart(fig, use_container_width=True)
+summary_data = []
+for metric in player_df["Metric_Type"].unique():
+    df_metric = player_df[player_df["Metric_Type"] == metric]
+    best_score = df_metric["Average"].min() if metric in lower_is_better else df_metric["Average"].max()
+    summary_data.append({"Metric": metric, "Best Score": best_score})
 
-    st.markdown("</div>", unsafe_allow_html=True)
+best_df = pd.DataFrame(summary_data)
+best_df["Best Score"] = pd.to_numeric(best_df["Best Score"], errors="coerce")
+
+# ---- FIX: Only format numeric column ----
+st.dataframe(
+    best_df.style.format({"Best Score": "{:.2f}"}),
+    use_container_width=True
+)
+
+
+# =========================
+# TREND CHARTS
+# =========================
+st.markdown("### 📈 Performance Trends")
+
+for metric in player_df["Metric_Type"].unique():
+    df_m = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
+    fig = px.line(
+        df_m, x="Date", y="Average",
+        markers=True,
+        title=f"{metric} Progress Over Time"
+    )
+    fig.update_layout(height=350)
+    st.plotly_chart(fig, use_container_width=True)
+
 
 # =============================================================
 # --------------------- TEAM TAB ------------------------------
