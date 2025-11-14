@@ -251,7 +251,9 @@ with tab1:
                 summary_data.append({"Metric": metric, "Best Score": best_score})
 
             best_df = pd.DataFrame(summary_data)
-            st.dataframe(best_df.style.format({"Best Score": "{:.2f}"}), use_container_width=True)
+            best_df["Best Score"] = pd.to_numeric(best_df["Best Score"], errors="coerce")
+            st.dataframe(best_df.style.format({"Best Score": lambda x: f"{x:.2f}" if pd.notnull(x) else "N/A"}), 
+             use_container_width=True)
 
             # =========================
             # TREND CHARTS
