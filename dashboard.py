@@ -278,7 +278,7 @@ baseball_metrics = [
 ]
 
 speed_metrics = [
-    "10 Yard Sprint", "Pro Agility"
+    "10 yard sprint", "Pro Agility"
 ]
 
 # Helper function to compute summary for cards
