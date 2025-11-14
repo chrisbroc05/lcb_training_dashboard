@@ -273,8 +273,8 @@ st.markdown("### 📈 Performance Trends")
 
 # --- Metric Groups ---
 baseball_metrics = [
-    "Arm Speed - Pitch", "Arm Speed - Reg",
-    "BES - Flip", "BES - Tee"
+    "Arm Speed Pitch", "Arm Speed Reg",
+    "BES Flip", "BES Tee"
 ]
 
 speed_metrics = [
