@@ -134,15 +134,50 @@ with tab1:
             player_team = player_df["Team"].dropna().iloc[0] if not player_df["Team"].dropna().empty else "N/A"
             total_sessions = player_df["Date"].nunique()
 
-            # KPI tiles row
-            k1, k2, k3, k4, k5 = st.columns([1,1,1,1,1])
-            k1.markdown(f'<div class="kpi"><h4 style="margin:6px 0 4px 0">Player</h4><b>{selected_player}</b></div>', unsafe_allow_html=True)
-            k2.markdown(f'<div class="kpi"><h4 style="margin:6px 0 4px 0">Team</h4><b>{player_team}</b></div>', unsafe_allow_html=True)
-            k3.markdown(f'<div class="kpi"><h4 style="margin:6px 0 4px 0">Age Group</h4><b>{age_group}</b></div>', unsafe_allow_html=True)
-            k4.markdown(f'<div class="kpi"><h4 style="margin:6px 0 4px 0">Sessions</h4><b>{total_sessions}</b></div>', unsafe_allow_html=True)
-            k5.markdown(f'<div class="kpi"><h4 style="margin:6px 0 4px 0">Latest Date</h4><b>{player_df["Date"].max().date() if not player_df["Date"].isna().all() else "N/A"}</b></div>', unsafe_allow_html=True)
+# ==========================
+# Player Summary Card
+# ==========================
+st.markdown('<div class="card">', unsafe_allow_html=True)
 
-            st.markdown('</div>', unsafe_allow_html=True)  # close card
+st.markdown("""
+<h3 style='margin-bottom:10px'>📊 Player Summary</h3>
+""", unsafe_allow_html=True)
+
+# --- FIRST ROW: Player Info ---
+colA, colB, colC = st.columns([1,1,1])
+colA.markdown(f"<div class='kpi'><h4>Player</h4><b>{selected_player}</b></div>", unsafe_allow_html=True)
+colB.markdown(f"<div class='kpi'><h4>Team</h4><b>{player_team}</b></div>", unsafe_allow_html=True)
+colC.markdown(f"<div class='kpi'><h4>Age Group</h4><b>{age_group}</b></div>", unsafe_allow_html=True)
+
+st.markdown("<hr style='margin:12px 0;'>", unsafe_allow_html=True)
+
+            # ==========================
+            # Best Scores summary table
+            # ==========================
+            st.markdown("<h4 style='margin-top:0'>🏅 Best Performance by Metric</h4>", unsafe_allow_html=True)
+            
+            summary_data = []
+            for metric in player_df["Metric_Type"].unique():
+                df_metric = player_df[player_df["Metric_Type"] == metric]
+            
+                # Best result depends on whether low is better
+                best_result = (
+                    df_metric["Average"].min() if metric in lower_is_better
+                    else df_metric["Average"].max()
+                )
+            
+                summary_data.append({"Metric": metric, "Best Score": best_result})
+            
+            summary_df = pd.DataFrame(summary_data)
+            
+            # Render summary (clean table)
+            st.dataframe(
+                summary_df.style.format({"Best Score": "{:.2f}"})
+                                 .set_properties(**{"text-align": "center"}),
+                use_container_width=True
+            )
+            
+            st.markdown("</div>", unsafe_allow_html=True)
 
             # Build summary table per metric: First, Last, Best, Growth (last - best), Goal
             metrics = player_df["Metric_Type"].dropna().unique().tolist()
@@ -159,7 +194,7 @@ with tab1:
                 else:
                     best_result = df_m["Average"].max()
                 # Growth per your request = last_result - best_result
-                growth = last_result - best_result
+                growth = best_result - first_result
                 # goal (target) from targets; use player's age_group
                 goal = targets.get(age_group, {}).get(m) if age_group in targets else None
                 summary_rows.append({
