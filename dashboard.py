@@ -300,6 +300,40 @@ def get_metric_summary(df, metric):
     return first, best, growth
 
 
+# =========================
+# PERFORMANCE TRENDS
+# =========================
+st.markdown("### 📈 Performance Trends")
+
+# --- Metric Groups ---
+baseball_metrics = [
+    "Arm Speed Pitch", "Arm Speed Reg",
+    "BES Flip", "BES Tee"
+]
+
+speed_metrics = [
+    "10 yard sprint", "Pro Agility"
+]
+
+# Helper function to compute summary for cards
+def get_metric_summary(df, metric):
+    mdf = df[df["Metric_Type"] == metric].sort_values("Date")
+    if mdf.empty:
+        return None, None, None
+
+    first = mdf["Average"].iloc[0]
+    latest = mdf["Average"].iloc[-1]
+
+    if metric in lower_is_better:
+        best = mdf["Average"].min()
+        growth = first - best   # lower = better
+    else:
+        best = mdf["Average"].max()
+        growth = best - first   # higher = better
+
+    return first, best, growth
+
+
 # ==============================
 # BASEBALL PERFORMANCE TRENDS
 # ==============================
@@ -318,74 +352,36 @@ if not df_baseball.empty:
     st.plotly_chart(fig1, use_container_width=True)
 
     # Cards for baseball metrics
-card_cols = st.columns(4)
+    card_cols = st.columns(4)
+    for i, metric in enumerate(baseball_metrics):
+        first, best, growth = get_metric_summary(player_df, metric)
 
-for i, metric in enumerate(baseball_metrics):
-    first, best, growth = get_metric_summary(player_df, metric)
-    if first is None:
-        continue
+        if first is None:
+            continue
 
-    # Determine positive/negative growth
-    color = "#6AA84F" if growth > 0 else "#CC0000"
-    sign = "+" if growth > 0 else ""
-    growth_str = f"{sign}{growth:.2f}"
+        color = "green" if growth > 0 else "red"
+        growth_str = f"{growth:.2f}"
 
-    with card_cols[i % 4]:
-        st.markdown(
-            f"""
-<div style="
-    background: white;
-    border-radius: 14px;
-    padding: 16px;
-    margin-top: 12px;
-    text-align: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-    border: 1px solid #E5E5E5;
-">
-
-    <!-- Metric header -->
-    <div style="
-        font-size: 18px; 
-        font-weight: 700; 
-        color: #1155CC; 
-        margin-bottom: 12px;
-    ">
-        {metric}
-    </div>
-
-    <!-- First Result -->
-    <div style="
-        font-size: 14px; 
-        color: #444; 
-        margin-bottom: 4px;
-    ">
-        First: <b>{first:.2f}</b>
-    </div>
-
-    <!-- Best Result -->
-    <div style="
-        font-size: 14px; 
-        color: #444; 
-        margin-bottom: 6px;
-    ">
-        Best: <b>{best:.2f}</b>
-    </div>
-
-    <!-- Growth (red or green) -->
-    <div style="
-        font-size: 17px; 
-        font-weight: 700; 
-        color: {color};
-        margin-top: 6px;
-    ">
-        {growth_str}
-    </div>
-
-</div>
-            """,
-            unsafe_allow_html=True
-        )
-
+        with card_cols[i % 4]:
+            st.markdown(
+                f"""
+                <div style="
+                    border:1px solid #ccc;
+                    border-radius:10px;
+                    padding:10px;
+                    margin-top:10px;
+                    text-align:center;
+                ">
+                    <h4 style="margin:0; font-size:18px;">{metric}</h4>
+                    <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
+                    <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
+                    <p style="margin:4px 0; color:{color};">
+                        Growth: <b>{growth_str}</b>
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 
 # ==============================
