@@ -265,41 +265,6 @@ st.dataframe(
     use_container_width=True
 )
 
-
-# =========================
-# PERFORMANCE TRENDS
-# =========================
-st.markdown("### 📈 Performance Trends")
-
-# --- Metric Groups ---
-baseball_metrics = [
-    "Arm Speed Pitch", "Arm Speed Reg",
-    "BES Flip", "BES Tee"
-]
-
-speed_metrics = [
-    "10 yard sprint", "Pro Agility"
-]
-
-# Helper function to compute summary for cards
-def get_metric_summary(df, metric):
-    mdf = df[df["Metric_Type"] == metric].sort_values("Date")
-    if mdf.empty:
-        return None, None, None
-
-    first = mdf["Average"].iloc[0]
-    latest = mdf["Average"].iloc[-1]
-
-    if metric in lower_is_better:
-        best = mdf["Average"].min()
-        growth = first - best   # lower = better
-    else:
-        best = mdf["Average"].max()
-        growth = best - first   # higher = better
-
-    return first, best, growth
-
-
 # =========================
 # PERFORMANCE TRENDS
 # =========================
@@ -365,13 +330,21 @@ if not df_baseball.empty:
         with card_cols[i % 4]:
             st.markdown(
                 f"""
-                <div style="
-                    border:1px solid #ccc;
-                    border-radius:10px;
-                    padding:10px;
-                    margin-top:10px;
-                    text-align:center;
-                ">
+        <div style="
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 12px;
+            text-align: center;
+            border: 1px solid #E5E5E5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        ">
+            <h4 style="
+                margin: 0 0 10px 0; 
+                font-size: 18px; 
+                font-weight: 700; 
+                color: #1155CC;
+            ">
                     <h4 style="margin:0; font-size:18px;">{metric}</h4>
                     <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
                     <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
