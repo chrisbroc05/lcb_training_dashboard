@@ -327,7 +327,7 @@ if not df_baseball.empty:
         color = "green" if growth > 0 else "red"
         growth_str = f"{growth:.2f}"
 
-       with card_cols[i % 4]:
+    with card_cols[i % 4]:
     st.markdown(
         f"""
         <div style="
