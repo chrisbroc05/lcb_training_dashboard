@@ -480,4 +480,3 @@ with tab3:
     st.dataframe(df_metric.head(15), use_container_width=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
-
