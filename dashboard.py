@@ -339,24 +339,30 @@ if not df_baseball.empty:
             border: 1px solid #E5E5E5;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         ">
-            <h4 style="
-                margin: 0 0 10px 0; 
-                font-size: 18px; 
+            {metric}
+            </h4>
+
+            <p style="margin: 4px 0; font-size: 15px; color: #333;">
+                First: <b>{first:.2f}</b>
+            </p>
+
+            <p style="margin: 4px 0; font-size: 15px; color: #333;">
+                Best: <b>{best:.2f}</b>
+            </p>
+
+            <p style="
+                margin: 8px 0 0 0; 
+                font-size: 17px; 
                 font-weight: 700; 
-                color: #1155CC;
+                color: {color};
             ">
-                    <h4 style="margin:0; font-size:18px;">{metric}</h4>
-                    <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
-                    <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
-                    <p style="margin:4px 0; color:{color};">
-                        Growth: <b>{growth_str}</b>
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-
+                {growth_str}
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+            
 # ==============================
 # SPEED / AGILITY PERFORMANCE
 # ==============================
