@@ -302,51 +302,46 @@ def get_metric_summary(df, metric):
 
 # ----- Styled KPI Card Function -----
 def metric_card(metric, first, best, growth, lower_is_better=False):
-    # Determine card color (green for improvement, red for decline)
+
     if lower_is_better:
-        # Lower = better → negative growth is good
         color = "#6AA84F" if growth < 0 else "red"
         sign = "" if growth < 0 else "+"
     else:
-        # Higher = better → positive growth is good
         color = "#6AA84F" if growth > 0 else "red"
         sign = "+" if growth > 0 else ""
 
     growth_str = f"{sign}{growth:.2f}"
 
-    return f"""
-    <div style="
-        background: white;
-        border-radius: 14px;
-        padding: 16px;
-        margin-top: 12px;
-        text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.09);
-        border: 1px solid #e6e6e6;
-    ">
-        
-        <!-- Metric Title -->
-        <div style="font-size: 18px; font-weight: 700; color: #1155CC; margin-bottom: 8px;">
-            {metric}
-        </div>
+    html = f"""
+<div style="
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.09);
+    border: 1px solid #e6e6e6;
+">
 
-        <!-- First -->
-        <div style="font-size: 16px; margin-bottom: 4px;">
-            <b>{first:.2f}</b>
-        </div>
-
-        <!-- Best -->
-        <div style="font-size: 16px; margin-bottom: 8px;">
-            <b>{best:.2f}</b>
-        </div>
-
-        <!-- Growth -->
-        <div style="font-size: 18px; font-weight: 700; color: {color};">
-            {growth_str}
-        </div>
-
+    <div style="font-size: 18px; font-weight: 700; color: #1155CC; margin-bottom: 8px;">
+        {metric}
     </div>
-    """
+
+    <div style="font-size: 16px; margin-bottom: 4px;">
+        <b>{first:.2f}</b>
+    </div>
+
+    <div style="font-size: 16px; margin-bottom: 8px;">
+        <b>{best:.2f}</b>
+    </div>
+
+    <div style="font-size: 18px; font-weight: 700; color: {color};">
+        {growth_str}
+    </div>
+
+</div>
+"""
+    return html
 
 # ==============================
 # BASEBALL PERFORMANCE
