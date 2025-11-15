@@ -327,20 +327,24 @@ if not df_baseball.empty:
         color = "green" if growth > 0 else "red"
         growth_str = f"{growth:.2f}"
 
-        with card_cols[i % 4]:
-            st.markdown(
-                f"""
+       with card_cols[i % 4]:
+    st.markdown(
+        f"""
         <div style="
             background: #FFFFFF;
             border-radius: 14px;
             padding: 16px;
             margin-top: 12px;
             text-align: center;
-            border: 1px solid #E5E5E5;
+            border: 1px solid #D9D9D9;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         ">
-            {metric}
-            </h4>
+            <h4 style="
+                margin: 0 0 10px 0;
+                font-size: 18px;
+                font-weight: 700;
+                color: #1155CC;
+            ">{metric}</h4>
 
             <p style="margin: 4px 0; font-size: 15px; color: #333;">
                 First: <b>{first:.2f}</b>
@@ -351,9 +355,9 @@ if not df_baseball.empty:
             </p>
 
             <p style="
-                margin: 8px 0 0 0; 
-                font-size: 17px; 
-                font-weight: 700; 
+                margin: 8px 0 0 0;
+                font-size: 17px;
+                font-weight: 700;
                 color: {color};
             ">
                 {growth_str}
@@ -362,6 +366,7 @@ if not df_baseball.empty:
         """,
         unsafe_allow_html=True
     )
+
             
 # ==============================
 # SPEED / AGILITY PERFORMANCE
