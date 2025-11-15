@@ -273,12 +273,12 @@ st.markdown("### 📈 Performance Trends")
 
 # --- Metric Groups ---
 baseball_metrics = [
-    "Arm Speed - Pitch", "Arm Speed - Reg",
-    "BES - Flip", "BES - Tee"
+    "Arm Speed Pitch", "Arm Speed Reg",
+    "BES Flip", "BES Tee"
 ]
 
 speed_metrics = [
-    "10 Yard Sprint", "Pro Agility"
+    "10 yard sprint", "Pro Agility"
 ]
 
 # Helper function to compute summary for cards
