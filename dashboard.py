@@ -191,6 +191,8 @@ try:
     """,
     unsafe_allow_html=True
 )
+except:
+    st.warning("Logo not found — make sure 'lcb training logo.png' is present.")
 
 # =========================
 # TABS
