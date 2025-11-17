@@ -147,21 +147,50 @@ try:
     logo_b64 = image_to_base64(logo)
 
     st.markdown(
-        f"""
-        <div class="header-wrapper">
-            <img src="data:image/png;base64,{logo_b64}" class="header-logo">
-            <div class="header-text">
-                <h1>LCB Training Performance Dashboard</h1>
-                <p>Elite Player Development • Strength • Speed • Confidence</p>
-                <p class="slogan">Elite Baseball Training for Teams and Players — Helping Athletes Build Strength, Skill, and Confidence On and Off the Field</p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-except:
-    st.warning("Logo not found — make sure 'lcb training logo.png' is present.")
+    f"""
+    <style>
+        .header-wrapper {{
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }}
+        .header-logo {{
+            width: 120px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }}
+        .header-text h1 {{
+            margin: 0;
+            font-size: 36px;
+            color: #1F4E79;
+        }}
+        .header-text p {{
+            margin: 2px 0;
+            font-size: 16px;
+            color: #333;
+        }}
+        .header-text .slogan {{
+            font-size: 14px;
+            font-style: italic;
+            color: #6AA84F;
+            margin-top: 5px;
+            max-width: 600px;
+        }}
+    </style>
 
+    <div class="header-wrapper">
+        <img src="data:image/png;base64,{logo_b64}" class="header-logo">
+        <div class="header-text">
+            <h1>LCB Training Performance Dashboard</h1>
+            <p>Player Development • Strength • Speed • Confidence</p>
+            <p class="slogan">Elite Player Development Training for Teams and Players — <b>Helping Athletes Build Strength, Skill, and Confidence On and Off the Field</b></p>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # =========================
 # TABS
@@ -433,7 +462,7 @@ with tab2:
             # ---------------------------
             # Team Performance Trends - Strength
             # ---------------------------
-            st.markdown("### ⚾ Team Strength Metrics")
+            st.markdown("### Team Strength Metrics")
             
             # Filter strength metrics for the team
             team_strength = team_df[team_df["Metric_Type"].isin(baseball_metrics)]
@@ -451,7 +480,7 @@ with tab2:
             # ---------------------------
             # Team Performance Trends - Speed & Agility
             # ---------------------------
-            st.markdown("### 🏃 Team Speed & Agility Metrics")
+            st.markdown("### Team Speed & Agility Metrics")
             
             # Filter speed metrics for the team
             team_speed = team_df[team_df["Metric_Type"].isin(speed_metrics)]
@@ -472,7 +501,7 @@ with tab2:
             # ---------------------------
             # Top Performers Table with Metric Filter
             # ---------------------------
-            st.markdown("### 🌟 Top Performers by Metric")
+            st.markdown("### Top Performers by Metric")
             
             # Metric selection for filtering
             metrics_for_filter = sorted(team_df["Metric_Type"].unique())
