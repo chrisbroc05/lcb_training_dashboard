@@ -326,24 +326,30 @@ if not df_baseball.empty:
 
         with card_cols[i % 4]:
             st.markdown(
-                f"""
-                <div style="
-                    border:1px solid #ccc;
-                    border-radius:10px;
-                    padding:10px;
-                    margin-top:10px;
-                    text-align:center;
-                ">
-                    <h4 style="margin:0; font-size:18px;">{metric}</h4>
-                    <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
-                    <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
-                    <p style="margin:4px 0; color:{color};">
-                        Growth: <b>{growth_str}</b>
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+        f"""
+        <div class="kpi">
+            <h4>{metric}</h4>
+
+            <p style="margin:4px 0; font-size: 15px; color:#333;">
+                First: <b>{first:.2f}</b>
+            </p>
+
+            <p style="margin:4px 0; font-size: 15px; color:#333;">
+                Best: <b>{best:.2f}</b>
+            </p>
+
+            <p style="
+                margin: 8px 0 0 0;
+                font-size: 17px;
+                font-weight: 700;
+                color:{color};
+            ">
+                {growth_str}
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # ==============================
