@@ -334,33 +334,14 @@ for i, metric in enumerate(baseball_metrics):
     color = "#6AA84F" if growth > 0 else "red"  # Company green for improvement
 
     with card_cols[i % 4]:
-        st.markdown(
-            f"""
-            <div class='kpi'>
-                <h4>{metric}</h4>
-
-                <p style="margin:4px 0; font-size: 15px; color:#333;">
-                    First: <b>{first:.2f}</b>
-                </p>
-
-                <p style="margin:4px 0; font-size: 15px; color:#333;">
-                    Best: <b>{best:.2f}</b>
-                </p>
-
-                <p style="
-                    margin: 8px 0 0 0;
-                    font-size: 17px;
-                    font-weight: 700;
-                    color:{color};
-                ">
-                    {growth:.2f}
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
+    st.markdown(f"""
+    <div class='kpi'>
+        <h4>{metric}</h4>
+        <b>First:</b> {first:.2f} <br>
+        <b>Best:</b> {best:.2f} <br>
+        <b style="color:{color};">Growth:</b> {growth:.2f}
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==============================
 # SPEED / AGILITY PERFORMANCE
