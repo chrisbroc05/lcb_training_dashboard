@@ -418,9 +418,9 @@ with tab2:
 
             # Calculate averages for the team
             avg_age = round(team_df["Age"].mean(), 1)
-            avg_bes_tee = round(team_df[team_df["Metric_Type"].isin(["Arm Speed Pitch", "Arm Speed Reg"])]["Average"].mean(), 1)
-            avg_sprint = round(team_df[team_df["Metric_Type"].isin(["BES Flip", "BES Tee"])]["Average"].mean(), 1)
-            avg_speed = round(team_df[team_df["Metric_Type"].isin(["10 yard sprint", "Pro Agility"])]["Average"].mean(), 1)
+            avg_bes_tee = round(team_df[team_df["Metric_Type"].isin(["BES Tee"])]["Average"].mean(), 1)
+            avg_sprint = round(team_df[team_df["Metric_Type"].isin(["10 yard sprint"])]["Average"].mean(), 1)
+            avg_speed = round(team_df[team_df["Metric_Type"].isin(["Pro Agility"])]["Average"].mean(), 1)
 
             kpi_cols = st.columns(4)
             kpi_cols[0].markdown(f"<div class='kpi'><h4>Avg Age</h4><b>{avg_age}</b></div>", unsafe_allow_html=True)
