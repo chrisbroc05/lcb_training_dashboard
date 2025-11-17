@@ -164,17 +164,17 @@ try:
         .header-text h1 {{
             margin: 0;
             font-size: 36px;
-            color: #1F4E79;
+            color: #FFFFFF;
         }}
         .header-text p {{
             margin: 2px 0;
             font-size: 16px;
-            color: #333;
+            color: #FFFFFF;
         }}
         .header-text .slogan {{
             font-size: 14px;
             font-style: italic;
-            color: #6AA84F;
+            color: #FFFFFF;
             margin-top: 5px;
             max-width: 600px;
         }}
