@@ -376,7 +376,7 @@ if not df_baseball.empty:
             growth_color = "#000000"  # black if no change
             arrow = ""
 
-        with card_cols[i % 4]:
+        with card_cols[i % 2]:
             st.markdown(f"""
             <div class='kpi' style="text-align:center; padding:20px;">
                 <h3 style="margin:0 0 10px 0; font-size:20px;">{metric}</h3>
