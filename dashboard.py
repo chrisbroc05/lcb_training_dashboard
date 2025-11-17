@@ -296,9 +296,9 @@ def get_metric_summary(df, metric):
     return first, best, growth
 
 
-# ==============================
-# BASEBALL PERFORMANCE TRENDS
-# ==============================
+# -----------------------------
+# KPI Cards for Baseball Metrics
+# -----------------------------
 st.markdown("#### ⚾ Baseball Performance Metrics")
 
 df_baseball = player_df[player_df["Metric_Type"].isin(baseball_metrics)]
@@ -313,29 +313,27 @@ if not df_baseball.empty:
     fig1.update_layout(height=350, legend_title_text="Metric")
     st.plotly_chart(fig1, use_container_width=True)
 
-    # Cards for baseball metrics
-card_cols = st.columns(4)
-for i, metric in enumerate(baseball_metrics):
-    first, best, growth = get_metric_summary(player_df, metric)
-    if first is None:
-        continue
+    card_cols = st.columns(4)
+    for i, metric in enumerate(baseball_metrics):
+        first, best, growth = get_metric_summary(player_df, metric)
+        if first is None:
+            continue
 
-    color = "#6AA84F" if growth > 0 else "red"  # company green
+        growth_color = "#6AA84F" if growth > 0 else "red"  # only the number changes color
 
-    with card_cols[i % 4]:
-        st.markdown(f"""
-        <div class='kpi'>
-            <h4>{metric}</h4>
-            <b>First:</b> {first:.2f} <br>
-            <b>Best:</b> {best:.2f} <br>
-            <b style="color:{color};">Growth:</b> {growth:.2f}
-        </div>
-        """, unsafe_allow_html=True)
+        with card_cols[i % 4]:
+            st.markdown(f"""
+            <div class='kpi'>
+                <h4>{metric}</h4>
+                <b>First:</b> {first:.2f} <br>
+                <b>Best:</b> {best:.2f} <br>
+                <b>Growth:</b> <span style="color:{growth_color};">{growth:.2f}</span>
+            </div>
+            """, unsafe_allow_html=True)
 
-
-# ==============================
-# SPEED / AGILITY PERFORMANCE
-# ==============================
+# -----------------------------
+# KPI Cards for Speed/Agility Metrics
+# -----------------------------
 st.markdown("#### 🏃 Speed & Agility Metrics")
 
 df_speed = player_df[player_df["Metric_Type"].isin(speed_metrics)]
@@ -350,38 +348,23 @@ if not df_speed.empty:
     fig2.update_layout(height=350, legend_title_text="Metric")
     st.plotly_chart(fig2, use_container_width=True)
 
-    # Cards for speed metrics
     card_cols2 = st.columns(2)
     for i, metric in enumerate(speed_metrics):
         first, best, growth = get_metric_summary(player_df, metric)
-
         if first is None:
             continue
 
-        color = "green" if growth > 0 else "red"
-        growth_str = f"{growth:.2f}"
+        growth_color = "#6AA84F" if growth > 0 else "red"
 
         with card_cols2[i % 2]:
-            st.markdown(
-                f"""
-                <div style="
-                    border:1px solid #ccc;
-                    border-radius:10px;
-                    padding:10px;
-                    margin-top:10px;
-                    text-align:center;
-                ">
-                    <h4 style="margin:0; font-size:18px;">{metric}</h4>
-                    <p style="margin:4px 0;">First: <b>{first:.2f}</b></p>
-                    <p style="margin:4px 0;">Best: <b>{best:.2f}</b></p>
-                    <p style="margin:4px 0; color:{color};">
-                        Growth: <b>{growth_str}</b>
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
+            st.markdown(f"""
+            <div class='kpi'>
+                <h4>{metric}</h4>
+                <b>First:</b> {first:.2f} <br>
+                <b>Best:</b> {best:.2f} <br>
+                <b>Growth:</b> <span style="color:{growth_color};">{growth:.2f}</span>
+            </div>
+            """, unsafe_allow_html=True)
 
 
 # =============================================================
