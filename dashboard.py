@@ -431,23 +431,43 @@ with tab2:
             st.markdown("<hr>", unsafe_allow_html=True)
 
             # ---------------------------
-            # Team Performance Trends
+            # Team Performance Trends - Strength
             # ---------------------------
-            st.markdown("### 📈 Team Performance Trends")
-
-            # Group by Date and Metric_Type to get team average per metric
-            team_metrics = team_df.groupby(["Date", "Metric_Type"])["Average"].mean().reset_index()
-
-            fig_team = px.line(
-                team_metrics.sort_values("Date"),
-                x="Date", y="Average", color="Metric_Type",
-                markers=True,
-                title=f"{selected_team} Performance Over Time"
-            )
-            fig_team.update_layout(height=400, legend_title_text="Metric")
-            st.plotly_chart(fig_team, use_container_width=True)
-
+            st.markdown("### ⚾ Team Strength Metrics")
+            
+            # Filter strength metrics for the team
+            team_strength = team_df[team_df["Metric_Type"].isin(baseball_metrics)]
+            if not team_strength.empty:
+                strength_metrics = team_strength.groupby(["Date", "Metric_Type"])["Average"].mean().reset_index()
+                fig_strength = px.line(
+                    strength_metrics.sort_values("Date"),
+                    x="Date", y="Average", color="Metric_Type",
+                    markers=True,
+                    title=f"{selected_team} Strength Performance Over Time"
+                )
+                fig_strength.update_layout(height=350, legend_title_text="Metric")
+                st.plotly_chart(fig_strength, use_container_width=True)
+            
+            # ---------------------------
+            # Team Performance Trends - Speed & Agility
+            # ---------------------------
+            st.markdown("### 🏃 Team Speed & Agility Metrics")
+            
+            # Filter speed metrics for the team
+            team_speed = team_df[team_df["Metric_Type"].isin(speed_metrics)]
+            if not team_speed.empty:
+                speed_metrics = team_speed.groupby(["Date", "Metric_Type"])["Average"].mean().reset_index()
+                fig_speed = px.line(
+                    speed_metrics.sort_values("Date"),
+                    x="Date", y="Average", color="Metric_Type",
+                    markers=True,
+                    title=f"{selected_team} Speed & Agility Performance Over Time"
+                )
+                fig_speed.update_layout(height=350, legend_title_text="Metric")
+                st.plotly_chart(fig_speed, use_container_width=True)
+            
             st.markdown("<hr>", unsafe_allow_html=True)
+
 
             # ---------------------------
             # Top Performers Table
