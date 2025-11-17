@@ -314,34 +314,24 @@ if not df_baseball.empty:
     st.plotly_chart(fig1, use_container_width=True)
 
     # Cards for baseball metrics
-    card_cols = st.columns(4)
-    for i, metric in enumerate(baseball_metrics):
-        first, best, growth = get_metric_summary(player_df, metric)
-
-        if first is None:
-            continue
-
-        color = "green" if growth > 0 else "red"
-        growth_str = f"{growth:.2f}"
-
-        # Cards for baseball metrics
 card_cols = st.columns(4)
 for i, metric in enumerate(baseball_metrics):
     first, best, growth = get_metric_summary(player_df, metric)
     if first is None:
         continue
 
-    color = "#6AA84F" if growth > 0 else "red"  # Company green for improvement
+    color = "#6AA84F" if growth > 0 else "red"  # company green
 
     with card_cols[i % 4]:
-    st.markdown(f"""
-    <div class='kpi'>
-        <h4>{metric}</h4>
-        <b>First:</b> {first:.2f} <br>
-        <b>Best:</b> {best:.2f} <br>
-        <b style="color:{color};">Growth:</b> {growth:.2f}
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class='kpi'>
+            <h4>{metric}</h4>
+            <b>First:</b> {first:.2f} <br>
+            <b>Best:</b> {best:.2f} <br>
+            <b style="color:{color};">Growth:</b> {growth:.2f}
+        </div>
+        """, unsafe_allow_html=True)
+
 
 # ==============================
 # SPEED / AGILITY PERFORMANCE
