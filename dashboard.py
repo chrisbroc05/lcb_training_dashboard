@@ -324,32 +324,42 @@ if not df_baseball.empty:
         color = "green" if growth > 0 else "red"
         growth_str = f"{growth:.2f}"
 
-        with card_cols[i % 4]:
-            st.markdown(
-        f"""
-        <div class="kpi">
-            <h4>{metric}</h4>
+        # Cards for baseball metrics
+card_cols = st.columns(4)
+for i, metric in enumerate(baseball_metrics):
+    first, best, growth = get_metric_summary(player_df, metric)
+    if first is None:
+        continue
 
-            <p style="margin:4px 0; font-size: 15px; color:#333;">
-                First: <b>{first:.2f}</b>
-            </p>
+    color = "#6AA84F" if growth > 0 else "red"  # Company green for improvement
 
-            <p style="margin:4px 0; font-size: 15px; color:#333;">
-                Best: <b>{best:.2f}</b>
-            </p>
+    with card_cols[i % 4]:
+        st.markdown(
+            f"""
+            <div class='kpi'>
+                <h4>{metric}</h4>
 
-            <p style="
-                margin: 8px 0 0 0;
-                font-size: 17px;
-                font-weight: 700;
-                color:{color};
-            ">
-                {growth_str}
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+                <p style="margin:4px 0; font-size: 15px; color:#333;">
+                    First: <b>{first:.2f}</b>
+                </p>
+
+                <p style="margin:4px 0; font-size: 15px; color:#333;">
+                    Best: <b>{best:.2f}</b>
+                </p>
+
+                <p style="
+                    margin: 8px 0 0 0;
+                    font-size: 17px;
+                    font-weight: 700;
+                    color:{color};
+                ">
+                    {growth:.2f}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
 
 
 # ==============================
