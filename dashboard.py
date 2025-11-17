@@ -359,7 +359,7 @@ if not df_baseball.empty:
     fig1.update_layout(height=350, legend_title_text="Metric")
     st.plotly_chart(fig1, use_container_width=True)
 
-    card_cols = st.columns(4)
+    card_cols = st.columns(2)
     for i, metric in enumerate(speed_metrics):
         first, best, growth = get_metric_summary(player_df, metric)
         if first is None:
