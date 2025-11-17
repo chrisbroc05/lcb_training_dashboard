@@ -299,7 +299,7 @@ def get_metric_summary(df, metric):
 # -----------------------------
 # KPI Cards for Baseball Metrics
 # -----------------------------
-st.markdown("#### ⚾ Baseball Performance Metrics")
+st.markdown("#### Strength Performance Metrics")
 
 df_baseball = player_df[player_df["Metric_Type"].isin(baseball_metrics)]
 
@@ -342,10 +342,13 @@ if not df_baseball.empty:
             </div>
             """, unsafe_allow_html=True)
 
+# Add vertical space
+st.markdown("<br><br>", unsafe_allow_html=True)  # <-- extra space between sections
+
 # -----------------------------
 # KPI Cards for Speed & Agility Metrics
 # -----------------------------
-st.markdown("#### ⚾ Baseball Performance Metrics")
+st.markdown("#### Speed & Agility Performance Metrics")
 
 df_baseball = player_df[player_df["Metric_Type"].isin(speed_metrics)]
 
