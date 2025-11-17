@@ -204,192 +204,192 @@ with tab1:
 
             st.markdown("<hr>", unsafe_allow_html=True)
 
-# =====================================================
-# RESULTS SUMMARY TABLE (FIRST, LATEST, BEST, GROWTH)
-# =====================================================
-st.markdown("### 📘 Results Summary")
-
-rows = []
-for metric in player_df["Metric_Type"].unique():
-    mdf = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
-
-    first = mdf["Average"].iloc[0]
-    latest = mdf["Average"].iloc[-1]
-
-    if metric in lower_is_better:
-        best = mdf["Average"].min()
-        growth = first - best  # improvement = decrease
-    else:
-        best = mdf["Average"].max()
-        growth = best - first  # improvement = increase
-
-    goal = targets.get(age_group, {}).get(metric, None)
-
-    rows.append({
-        "Metric": metric,
-        "First": first,
-        "Latest": latest,
-        "Best": best,
-        "Growth": growth,
-        "Goal": goal
-    })
-
-summary_df = pd.DataFrame(rows)
-
-# ---- FIXED: Format only the numeric columns ----
-numeric_cols = ["First", "Latest", "Best", "Growth", "Goal"]
-format_dict = {col: "{:.2f}" for col in numeric_cols if col in summary_df.columns}
-
-st.dataframe(summary_df.style.format(format_dict), use_container_width=True)
-st.markdown("<hr>", unsafe_allow_html=True)
-
-# =========================
-# BEST PERFORMANCES TABLE
-# =========================
-st.markdown("### 🏅 Best Performance by Metric")
-
-summary_data = []
-for metric in player_df["Metric_Type"].unique():
-    df_metric = player_df[player_df["Metric_Type"] == metric]
-    best_score = df_metric["Average"].min() if metric in lower_is_better else df_metric["Average"].max()
-    summary_data.append({"Metric": metric, "Best Score": best_score})
-
-best_df = pd.DataFrame(summary_data)
-best_df["Best Score"] = pd.to_numeric(best_df["Best Score"], errors="coerce")
-
-st.dataframe(
-    best_df.style.format({"Best Score": "{:.2f}"}),
-    use_container_width=True
-)
-
-# =========================
-# PERFORMANCE TRENDS
-# =========================
-st.markdown("### 📈 Performance Trends")
-
-# --- Metric Groups ---
-baseball_metrics = [
-    "Arm Speed Pitch", "Arm Speed Reg",
-    "BES Flip", "BES Tee"
-]
-
-speed_metrics = [
-    "10 yard sprint", "Pro Agility"
-]
-
-# Helper function to compute summary for cards
-def get_metric_summary(df, metric):
-    mdf = df[df["Metric_Type"] == metric].sort_values("Date")
-    if mdf.empty:
-        return None, None, None
-
-    first = mdf["Average"].iloc[0]
-    latest = mdf["Average"].iloc[-1]
-
-    if metric in lower_is_better:
-        best = mdf["Average"].min()
-        growth = first - best   # lower = better
-    else:
-        best = mdf["Average"].max()
-        growth = best - first   # higher = better
-
-    return first, best, growth
-
-
-# -----------------------------
-# KPI Cards for Baseball Metrics
-# -----------------------------
-st.markdown("#### Strength Performance Metrics")
-
-df_baseball = player_df[player_df["Metric_Type"].isin(baseball_metrics)]
-
-if not df_baseball.empty:
-    fig1 = px.line(
-        df_baseball.sort_values("Date"),
-        x="Date", y="Average", color="Metric_Type",
-        markers=True,
-        title="Strength Performance Over Time"
-    )
-    fig1.update_layout(height=350, legend_title_text="Metric")
-    st.plotly_chart(fig1, use_container_width=True)
-
-    card_cols = st.columns(4)
-    for i, metric in enumerate(baseball_metrics):
-        first, best, growth = get_metric_summary(player_df, metric)
-        if first is None:
-            continue
-
-        # Determine arrow and color
-        if growth > 0:
-            growth_color = "#00B050"  # vivid green
-            arrow = "▲"
-        elif growth < 0:
-            growth_color = "#FF0000"  # bright red
-            arrow = "▼"
-        else:
-            growth_color = "#000000"  # black if no change
-            arrow = ""
-
-        with card_cols[i % 4]:
-            st.markdown(f"""
-            <div class='kpi' style="text-align:center; padding:20px;">
-                <h3 style="margin:0 0 10px 0; font-size:20px;">{metric}</h3>
-                <p style="margin:4px 0; font-size:18px;"><b>First:</b> {first:.2f}</p>
-                <p style="margin:4px 0; font-size:18px;"><b>Best:</b> {best:.2f}</p>
-                <p style="margin:8px 0 0 0; font-size:20px; font-weight:700; color:{growth_color};">
-                    {arrow} {growth:.2f}
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-
-# Add vertical space
-st.markdown("<br><br>", unsafe_allow_html=True)  # <-- extra space between sections
-
-# -----------------------------
-# KPI Cards for Speed & Agility Metrics
-# -----------------------------
-st.markdown("#### Speed & Agility Performance Metrics")
-
-df_baseball = player_df[player_df["Metric_Type"].isin(speed_metrics)]
-
-if not df_baseball.empty:
-    fig1 = px.line(
-        df_baseball.sort_values("Date"),
-        x="Date", y="Average", color="Metric_Type",
-        markers=True,
-        title="Speed & Agility Performance Over Time"
-    )
-    fig1.update_layout(height=350, legend_title_text="Metric")
-    st.plotly_chart(fig1, use_container_width=True)
-
-    card_cols = st.columns(2)
-    for i, metric in enumerate(speed_metrics):
-        first, best, growth = get_metric_summary(player_df, metric)
-        if first is None:
-            continue
-
-        # Determine arrow and color
-        if growth > 0:
-            growth_color = "#00B050"  # vivid green
-            arrow = "▲"
-        elif growth < 0:
-            growth_color = "#FF0000"  # bright red
-            arrow = "▼"
-        else:
-            growth_color = "#000000"  # black if no change
-            arrow = ""
-
-        with card_cols[i % 2]:
-            st.markdown(f"""
-            <div class='kpi' style="text-align:center; padding:20px;">
-                <h3 style="margin:0 0 10px 0; font-size:20px;">{metric}</h3>
-                <p style="margin:4px 0; font-size:18px;"><b>First:</b> {first:.2f}</p>
-                <p style="margin:4px 0; font-size:18px;"><b>Best:</b> {best:.2f}</p>
-                <p style="margin:8px 0 0 0; font-size:20px; font-weight:700; color:{growth_color};">
-                    {arrow} {growth:.2f}
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+        # =====================================================
+        # RESULTS SUMMARY TABLE (FIRST, LATEST, BEST, GROWTH)
+        # =====================================================
+        st.markdown("### 📘 Results Summary")
+        
+        rows = []
+        for metric in player_df["Metric_Type"].unique():
+            mdf = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
+        
+            first = mdf["Average"].iloc[0]
+            latest = mdf["Average"].iloc[-1]
+        
+            if metric in lower_is_better:
+                best = mdf["Average"].min()
+                growth = first - best  # improvement = decrease
+            else:
+                best = mdf["Average"].max()
+                growth = best - first  # improvement = increase
+        
+            goal = targets.get(age_group, {}).get(metric, None)
+        
+            rows.append({
+                "Metric": metric,
+                "First": first,
+                "Latest": latest,
+                "Best": best,
+                "Growth": growth,
+                "Goal": goal
+            })
+        
+        summary_df = pd.DataFrame(rows)
+        
+        # ---- FIXED: Format only the numeric columns ----
+        numeric_cols = ["First", "Latest", "Best", "Growth", "Goal"]
+        format_dict = {col: "{:.2f}" for col in numeric_cols if col in summary_df.columns}
+        
+        st.dataframe(summary_df.style.format(format_dict), use_container_width=True)
+        st.markdown("<hr>", unsafe_allow_html=True)
+        
+        # =========================
+        # BEST PERFORMANCES TABLE
+        # =========================
+        st.markdown("### 🏅 Best Performance by Metric")
+        
+        summary_data = []
+        for metric in player_df["Metric_Type"].unique():
+            df_metric = player_df[player_df["Metric_Type"] == metric]
+            best_score = df_metric["Average"].min() if metric in lower_is_better else df_metric["Average"].max()
+            summary_data.append({"Metric": metric, "Best Score": best_score})
+        
+        best_df = pd.DataFrame(summary_data)
+        best_df["Best Score"] = pd.to_numeric(best_df["Best Score"], errors="coerce")
+        
+        st.dataframe(
+            best_df.style.format({"Best Score": "{:.2f}"}),
+            use_container_width=True
+        )
+        
+        # =========================
+        # PERFORMANCE TRENDS
+        # =========================
+        st.markdown("### 📈 Performance Trends")
+        
+        # --- Metric Groups ---
+        baseball_metrics = [
+            "Arm Speed Pitch", "Arm Speed Reg",
+            "BES Flip", "BES Tee"
+        ]
+        
+        speed_metrics = [
+            "10 yard sprint", "Pro Agility"
+        ]
+        
+        # Helper function to compute summary for cards
+        def get_metric_summary(df, metric):
+            mdf = df[df["Metric_Type"] == metric].sort_values("Date")
+            if mdf.empty:
+                return None, None, None
+        
+            first = mdf["Average"].iloc[0]
+            latest = mdf["Average"].iloc[-1]
+        
+            if metric in lower_is_better:
+                best = mdf["Average"].min()
+                growth = first - best   # lower = better
+            else:
+                best = mdf["Average"].max()
+                growth = best - first   # higher = better
+        
+            return first, best, growth
+        
+        
+        # -----------------------------
+        # KPI Cards for Baseball Metrics
+        # -----------------------------
+        st.markdown("#### Strength Performance Metrics")
+        
+        df_baseball = player_df[player_df["Metric_Type"].isin(baseball_metrics)]
+        
+        if not df_baseball.empty:
+            fig1 = px.line(
+                df_baseball.sort_values("Date"),
+                x="Date", y="Average", color="Metric_Type",
+                markers=True,
+                title="Strength Performance Over Time"
+            )
+            fig1.update_layout(height=350, legend_title_text="Metric")
+            st.plotly_chart(fig1, use_container_width=True)
+        
+            card_cols = st.columns(4)
+            for i, metric in enumerate(baseball_metrics):
+                first, best, growth = get_metric_summary(player_df, metric)
+                if first is None:
+                    continue
+        
+                # Determine arrow and color
+                if growth > 0:
+                    growth_color = "#00B050"  # vivid green
+                    arrow = "▲"
+                elif growth < 0:
+                    growth_color = "#FF0000"  # bright red
+                    arrow = "▼"
+                else:
+                    growth_color = "#000000"  # black if no change
+                    arrow = ""
+        
+                with card_cols[i % 4]:
+                    st.markdown(f"""
+                    <div class='kpi' style="text-align:center; padding:20px;">
+                        <h3 style="margin:0 0 10px 0; font-size:20px;">{metric}</h3>
+                        <p style="margin:4px 0; font-size:18px;"><b>First:</b> {first:.2f}</p>
+                        <p style="margin:4px 0; font-size:18px;"><b>Best:</b> {best:.2f}</p>
+                        <p style="margin:8px 0 0 0; font-size:20px; font-weight:700; color:{growth_color};">
+                            {arrow} {growth:.2f}
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+        
+        # Add vertical space
+        st.markdown("<br><br>", unsafe_allow_html=True)  # <-- extra space between sections
+        
+        # -----------------------------
+        # KPI Cards for Speed & Agility Metrics
+        # -----------------------------
+        st.markdown("#### Speed & Agility Performance Metrics")
+        
+        df_baseball = player_df[player_df["Metric_Type"].isin(speed_metrics)]
+        
+        if not df_baseball.empty:
+            fig1 = px.line(
+                df_baseball.sort_values("Date"),
+                x="Date", y="Average", color="Metric_Type",
+                markers=True,
+                title="Speed & Agility Performance Over Time"
+            )
+            fig1.update_layout(height=350, legend_title_text="Metric")
+            st.plotly_chart(fig1, use_container_width=True)
+        
+            card_cols = st.columns(2)
+            for i, metric in enumerate(speed_metrics):
+                first, best, growth = get_metric_summary(player_df, metric)
+                if first is None:
+                    continue
+        
+                # Determine arrow and color
+                if growth > 0:
+                    growth_color = "#00B050"  # vivid green
+                    arrow = "▲"
+                elif growth < 0:
+                    growth_color = "#FF0000"  # bright red
+                    arrow = "▼"
+                else:
+                    growth_color = "#000000"  # black if no change
+                    arrow = ""
+        
+                with card_cols[i % 2]:
+                    st.markdown(f"""
+                    <div class='kpi' style="text-align:center; padding:20px;">
+                        <h3 style="margin:0 0 10px 0; font-size:20px;">{metric}</h3>
+                        <p style="margin:4px 0; font-size:18px;"><b>First:</b> {first:.2f}</p>
+                        <p style="margin:4px 0; font-size:18px;"><b>Best:</b> {best:.2f}</p>
+                        <p style="margin:8px 0 0 0; font-size:20px; font-weight:700; color:{growth_color};">
+                            {arrow} {growth:.2f}
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 
 # =============================================================
@@ -418,15 +418,15 @@ with tab2:
 
             # Calculate averages for the team
             avg_age = round(team_df["Age"].mean(), 1)
-            avg_arm_speed = round(team_df[team_df["Metric_Type"].isin(["Arm Speed Pitch", "Arm Speed Reg"])]["Average"].mean(), 1)
-            avg_strength = round(team_df[team_df["Metric_Type"].isin(["BES Flip", "BES Tee"])]["Average"].mean(), 1)
+            avg_bes_tee = round(team_df[team_df["Metric_Type"].isin(["Arm Speed Pitch", "Arm Speed Reg"])]["Average"].mean(), 1)
+            avg_sprint = round(team_df[team_df["Metric_Type"].isin(["BES Flip", "BES Tee"])]["Average"].mean(), 1)
             avg_speed = round(team_df[team_df["Metric_Type"].isin(["10 yard sprint", "Pro Agility"])]["Average"].mean(), 1)
 
             kpi_cols = st.columns(4)
             kpi_cols[0].markdown(f"<div class='kpi'><h4>Avg Age</h4><b>{avg_age}</b></div>", unsafe_allow_html=True)
-            kpi_cols[1].markdown(f"<div class='kpi'><h4>Avg Arm Speed</h4><b>{avg_arm_speed}</b></div>", unsafe_allow_html=True)
-            kpi_cols[2].markdown(f"<div class='kpi'><h4>Avg Strength</h4><b>{avg_strength}</b></div>", unsafe_allow_html=True)
-            kpi_cols[3].markdown(f"<div class='kpi'><h4>Avg Speed</h4><b>{avg_speed}</b></div>", unsafe_allow_html=True)
+            kpi_cols[1].markdown(f"<div class='kpi'><h4>Avg BES Tee</h4><b>{avg_bes_tee}</b></div>", unsafe_allow_html=True)
+            kpi_cols[2].markdown(f"<div class='kpi'><h4>Avg 10 Yard Sprint</h4><b>{avg_sprint}</b></div>", unsafe_allow_html=True)
+            kpi_cols[3].markdown(f"<div class='kpi'><h4>Avg Pro Agility</h4><b>{avg_speed}</b></div>", unsafe_allow_html=True)
 
             st.markdown("<hr>", unsafe_allow_html=True)
 
