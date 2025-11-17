@@ -319,15 +319,18 @@ if not df_baseball.empty:
         if first is None:
             continue
 
-        growth_color = "#6AA84F" if growth > 0 else "red"  # only the number changes color
+        # brighter colors for growth
+        growth_color = "#00B050" if growth > 0 else "#FF0000"  # vivid green/red
 
         with card_cols[i % 4]:
             st.markdown(f"""
-            <div class='kpi'>
-                <h4>{metric}</h4>
-                <b>First:</b> {first:.2f} <br>
-                <b>Best:</b> {best:.2f} <br>
-                <b>Growth:</b> <span style="color:{growth_color};">{growth:.2f}</span>
+            <div class='kpi' style="text-align:center; padding:20px;">
+                <h3 style="margin:0 0 10px 0; font-size:20px;">{metric}</h3>
+                <p style="margin:4px 0; font-size:18px;"><b>First:</b> {first:.2f}</p>
+                <p style="margin:4px 0; font-size:18px;"><b>Best:</b> {best:.2f}</p>
+                <p style="margin:8px 0 0 0; font-size:20px; font-weight:700; color:{growth_color};">
+                    {growth:.2f}
+                </p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -354,15 +357,17 @@ if not df_speed.empty:
         if first is None:
             continue
 
-        growth_color = "#6AA84F" if growth > 0 else "red"
+        growth_color = "#00B050" if growth > 0 else "#FF0000"
 
         with card_cols2[i % 2]:
             st.markdown(f"""
-            <div class='kpi'>
-                <h4>{metric}</h4>
-                <b>First:</b> {first:.2f} <br>
-                <b>Best:</b> {best:.2f} <br>
-                <b>Growth:</b> <span style="color:{growth_color};">{growth:.2f}</span>
+            <div class='kpi' style="text-align:center; padding:20px;">
+                <h3 style="margin:0 0 10px 0; font-size:20px;">{metric}</h3>
+                <p style="margin:4px 0; font-size:18px;"><b>First:</b> {first:.2f}</p>
+                <p style="margin:4px 0; font-size:18px;"><b>Best:</b> {best:.2f}</p>
+                <p style="margin:8px 0 0 0; font-size:20px; font-weight:700; color:{growth_color};">
+                    {growth:.2f}
+                </p>
             </div>
             """, unsafe_allow_html=True)
 
