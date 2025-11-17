@@ -308,7 +308,7 @@ if not df_baseball.empty:
         df_baseball.sort_values("Date"),
         x="Date", y="Average", color="Metric_Type",
         markers=True,
-        title="Baseball Performance Over Time"
+        title="Strength Performance Over Time"
     )
     fig1.update_layout(height=350, legend_title_text="Metric")
     st.plotly_chart(fig1, use_container_width=True)
@@ -357,7 +357,7 @@ if not df_baseball.empty:
         df_baseball.sort_values("Date"),
         x="Date", y="Average", color="Metric_Type",
         markers=True,
-        title="Baseball Performance Over Time"
+        title="Speed & Agility Performance Over Time"
     )
     fig1.update_layout(height=350, legend_title_text="Metric")
     st.plotly_chart(fig1, use_container_width=True)
