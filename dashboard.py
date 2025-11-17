@@ -399,16 +399,69 @@ with tab2:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("Team Dashboard — Overview")
 
+    # ---------------------------
+    # Team Selection
+    # ---------------------------
     teams = sorted(df["Team"].dropna().unique())
     selected_team = st.selectbox("Select Team", teams)
 
     if selected_team:
-        team_df = df[df["Team"] == selected_team]
-        if not team_df.empty:
-            avg_age = round(team_df["Age"].mean(), 2)
-            st.write(f"**Avg Age:** {avg_age}")
+        team_df = df[df["Team"] == selected_team].copy()
+
+        if team_df.empty:
+            st.warning("No data found for this team.")
         else:
-            st.warning("No team data found.")
+            # ---------------------------
+            # Team Summary KPIs
+            # ---------------------------
+            st.markdown("<h3>📊 Team Summary</h3>", unsafe_allow_html=True)
+
+            # Calculate averages for the team
+            avg_age = round(team_df["Age"].mean(), 1)
+            avg_arm_speed = round(team_df[team_df["Metric_Type"].isin(["Arm Speed Pitch", "Arm Speed Reg"])]["Average"].mean(), 1)
+            avg_strength = round(team_df[team_df["Metric_Type"].isin(["BES Flip", "BES Tee"])]["Average"].mean(), 1)
+            avg_speed = round(team_df[team_df["Metric_Type"].isin(["10 yard sprint", "Pro Agility"])]["Average"].mean(), 1)
+
+            kpi_cols = st.columns(4)
+            kpi_cols[0].markdown(f"<div class='kpi'><h4>Avg Age</h4><b>{avg_age}</b></div>", unsafe_allow_html=True)
+            kpi_cols[1].markdown(f"<div class='kpi'><h4>Avg Arm Speed</h4><b>{avg_arm_speed}</b></div>", unsafe_allow_html=True)
+            kpi_cols[2].markdown(f"<div class='kpi'><h4>Avg Strength</h4><b>{avg_strength}</b></div>", unsafe_allow_html=True)
+            kpi_cols[3].markdown(f"<div class='kpi'><h4>Avg Speed</h4><b>{avg_speed}</b></div>", unsafe_allow_html=True)
+
+            st.markdown("<hr>", unsafe_allow_html=True)
+
+            # ---------------------------
+            # Team Performance Trends
+            # ---------------------------
+            st.markdown("### 📈 Team Performance Trends")
+
+            # Group by Date and Metric_Type to get team average per metric
+            team_metrics = team_df.groupby(["Date", "Metric_Type"])["Average"].mean().reset_index()
+
+            fig_team = px.line(
+                team_metrics.sort_values("Date"),
+                x="Date", y="Average", color="Metric_Type",
+                markers=True,
+                title=f"{selected_team} Performance Over Time"
+            )
+            fig_team.update_layout(height=400, legend_title_text="Metric")
+            st.plotly_chart(fig_team, use_container_width=True)
+
+            st.markdown("<hr>", unsafe_allow_html=True)
+
+            # ---------------------------
+            # Top Performers Table
+            # ---------------------------
+            st.markdown("### 🌟 Top Performers by Average Metric")
+            top_players = team_df.groupby("player_id").agg({
+                "Player_name_first": "first",
+                "Player_name_last": "first",
+                "Average": "mean"
+            }).reset_index()
+            top_players["Full Name"] = top_players["Player_name_first"] + " " + top_players["Player_name_last"]
+            top_players = top_players.sort_values("Average", ascending=False)
+
+            st.dataframe(top_players[["Full Name", "Average"]].head(10).style.format({"Average": "{:.2f}"}), use_container_width=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
