@@ -470,20 +470,42 @@ with tab2:
 
 
             # ---------------------------
-            # Top Performers Table
+            # Top Performers Table with Metric Filter
             # ---------------------------
-            st.markdown("### 🌟 Top Performers by Average Metric")
-            top_players = team_df.groupby("player_id").agg({
-                "Player_name_first": "first",
-                "Player_name_last": "first",
-                "Average": "mean"
-            }).reset_index()
-            top_players["Full Name"] = top_players["Player_name_first"] + " " + top_players["Player_name_last"]
-            top_players = top_players.sort_values("Average", ascending=False)
+            st.markdown("### 🌟 Top Performers by Metric")
+            
+            # Metric selection for filtering
+            metrics_for_filter = sorted(team_df["Metric_Type"].unique())
+            selected_metric = st.selectbox("Select Metric to View Top Performers", metrics_for_filter)
+            
+            if selected_metric:
+                metric_df = team_df[team_df["Metric_Type"] == selected_metric].copy()
+            
+                if metric_df.empty:
+                    st.warning("No data found for this metric.")
+                else:
+                    # Determine whether to use max or min based on metric type
+                    if selected_metric in lower_is_better:
+                        top_players_metric = metric_df.groupby("player_id").agg({
+                            "Player_name_first": "first",
+                            "Player_name_last": "first",
+                            "Average": "min"  # lower is better
+                        }).reset_index()
+                    else:
+                        top_players_metric = metric_df.groupby("player_id").agg({
+                            "Player_name_first": "first",
+                            "Player_name_last": "first",
+                            "Average": "max"  # higher is better
+                        }).reset_index()
+            
+                    top_players_metric["Full Name"] = top_players_metric["Player_name_first"] + " " + top_players_metric["Player_name_last"]
+                    top_players_metric = top_players_metric.sort_values("Average", ascending=(selected_metric in lower_is_better))
+            
+                    st.dataframe(
+                        top_players_metric[["Full Name", "Average"]].head(10).style.format({"Average": "{:.2f}"}),
+                        use_container_width=True
+                    )
 
-            st.dataframe(top_players[["Full Name", "Average"]].head(10).style.format({"Average": "{:.2f}"}), use_container_width=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
 # =============================================================
 # ------------------ LEADERBOARD TAB --------------------------
