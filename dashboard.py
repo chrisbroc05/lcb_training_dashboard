@@ -382,14 +382,15 @@ with tab1:
                 with card_cols[i % 4]:
                     st.markdown(f"""
                     <div class='kpi' style="text-align:center; padding:20px;">
-                        <h3 style="margin:0 0 10px 0; font-size:20px;">{metric}</h3>
-                        <p style="margin:4px 0; font-size:18px;"><b>First:</b> {first:.2f}</p>
-                        <p style="margin:4px 0; font-size:18px;"><b>Best:</b> {best:.2f}</p>
+                        <h3 style="margin:0 0 10px 0; font-size:20px; color:blue;">{metric}</h3>
+                        <p style="margin:4px 0; font-size:18px; color:blue;"><b>First:</b> {first:.2f}</p>
+                        <p style="margin:4px 0; font-size:18px; color:blue;"><b>Best:</b> {best:.2f}</p>
                         <p style="margin:8px 0 0 0; font-size:20px; font-weight:700; color:{growth_color};">
                             {arrow} {growth:.2f}
                         </p>
                     </div>
                     """, unsafe_allow_html=True)
+
         
         # Add vertical space
         st.markdown("<br><br>", unsafe_allow_html=True)  # <-- extra space between sections
