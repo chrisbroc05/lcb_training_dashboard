@@ -402,14 +402,32 @@ with tab1:
         df_baseball = player_df[player_df["Metric_Type"].isin(speed_metrics)]
         
         if not df_baseball.empty:
-            fig1 = px.line(
-                df_baseball.sort_values("Date"),
-                x="Date", y="Average", color="Metric_Type",
-                markers=True,
-                title="Speed & Agility Performance Over Time"
-            )
-            fig1.update_layout(height=350, legend_title_text="Metric")
-            st.plotly_chart(fig1, use_container_width=True)
+            df_baseball["Month"] = df_baseball["Date"].dt.month
+        
+            # First half of year (Jan - Jun)
+            df_h1 = df_baseball[df_baseball["Month"] <= 6]
+            if not df_h1.empty:
+                fig_h1 = px.line(
+                    df_h1.sort_values("Date"),
+                    x="Date", y="Average", color="Metric_Type",
+                    markers=True,
+                    title="Speed & Agility Performance (Jan - Jun)"
+                )
+                fig_h1.update_layout(height=350, legend_title_text="Metric")
+                st.plotly_chart(fig_h1, use_container_width=True)
+        
+            # Second half of year (Jul - Dec)
+            df_h2 = df_baseball[df_baseball["Month"] > 6]
+            if not df_h2.empty:
+                fig_h2 = px.line(
+                    df_h2.sort_values("Date"),
+                    x="Date", y="Average", color="Metric_Type",
+                    markers=True,
+                    title="Speed & Agility Performance (Jul - Dec)"
+                )
+                fig_h2.update_layout(height=350, legend_title_text="Metric")
+                st.plotly_chart(fig_h2, use_container_width=True)
+
         
             card_cols = st.columns(2)
             for i, metric in enumerate(speed_metrics):
