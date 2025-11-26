@@ -293,20 +293,23 @@ with tab1:
         format_dict = {col: "{:.2f}" for col in numeric_cols if col in summary_df.columns}
         
         # ---- CONDITIONAL FORMATTING FOR 'Best' ----
-        def color_best(val, metric):
+        def color_best_row(row):
+            metric = row["Metric"]
+            val = row["Best"]
             goal_val = targets.get(age_group, {}).get(metric, None)
             if goal_val is None:
-                return ""  # no formatting if no goal
+                return [""] * len(row)  # no formatting
             if metric in lower_is_better:
-                return "color: green" if val <= goal_val else "color: red"
+                color = "color: green" if val <= goal_val else "color: red"
             else:
-                return "color: green" if val >= goal_val else "color: red"
+                color = "color: green" if val >= goal_val else "color: red"
+            # Apply color only to 'Best', empty string for other columns
+            return [""]*row.index.get_loc("Best") + [color] + [""]*(len(row)-row.index.get_loc("Best")-1)
         
         summary_df_styled = summary_df.style.format(format_dict)\
-            .apply(lambda x: [color_best(v, x["Metric"]) for v in x], axis=1, subset=["Best"])
+            .apply(color_best_row, axis=1)
         
         st.dataframe(summary_df_styled, use_container_width=True)
-        st.markdown("<hr>", unsafe_allow_html=True)
 
         
         # =========================
