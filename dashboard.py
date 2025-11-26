@@ -260,56 +260,61 @@ with tab1:
         # RESULTS SUMMARY TABLE (FIRST, LATEST, BEST, GROWTH)
         # ===========================
         st.markdown("### 📘 Results Summary")
+
+        # Create 3 or 4 columns per row for the cards
+        cards_per_row = 3
+        card_cols = st.columns(cards_per_row)
         
-        rows = []
-        for metric in player_df["Metric_Type"].unique():
-            mdf = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
-        
-            first = mdf["Average"].iloc[0]
-            latest = mdf["Average"].iloc[-1]
-        
-            if metric in lower_is_better:
-                best = mdf["Average"].min()
-                growth = first - best  # improvement = decrease
-            else:
-                best = mdf["Average"].max()
-                growth = best - first  # improvement = increase
-        
-            goal = targets.get(age_group, {}).get(metric, None)
-        
-            rows.append({
-                "Metric": metric,
-                "First": first,
-                "Latest": latest,
-                "Best": best,
-                "Growth": growth,
-                "Goal": goal
-            })
-        
-        summary_df = pd.DataFrame(rows)
-        
-        # ---- FORMAT NUMERIC COLUMNS ----
-        numeric_cols = ["First", "Latest", "Best", "Growth", "Goal"]
-        format_dict = {col: "{:.2f}" for col in numeric_cols if col in summary_df.columns}
-        
-        # ---- CONDITIONAL FORMATTING FOR 'Best' ----
-        def color_best_row(row):
+        for i, row in summary_df.iterrows():
             metric = row["Metric"]
-            val = row["Best"]
-            goal_val = targets.get(age_group, {}).get(metric, None)
-            if goal_val is None:
-                return [""] * len(row)  # no formatting
-            if metric in lower_is_better:
-                color = "color: green" if val <= goal_val else "color: red"
+            first = row["First"]
+            latest = row["Latest"]
+            best = row["Best"]
+            growth = row["Growth"]
+            goal = row["Goal"]
+        
+            # Determine colors
+            # Best: green if goal met, red otherwise
+            if goal is not None:
+                if metric in lower_is_better:
+                    best_color = "green" if best <= goal else "red"
+                else:
+                    best_color = "green" if best >= goal else "red"
             else:
-                color = "color: green" if val >= goal_val else "color: red"
-            # Apply color only to 'Best', empty string for other columns
-            return [""]*row.index.get_loc("Best") + [color] + [""]*(len(row)-row.index.get_loc("Best")-1)
+                best_color = "black"
         
-        summary_df_styled = summary_df.style.format(format_dict)\
-            .apply(color_best_row, axis=1)
+            # Growth arrow and color
+            if metric in lower_is_better:
+                arrow = "⬇️" if growth > 0 else "⬆️"
+                growth_color = "green" if growth > 0 else "red"
+            else:
+                arrow = "⬆️" if growth > 0 else "⬇️"
+                growth_color = "green" if growth > 0 else "red"
         
-        st.dataframe(summary_df_styled, use_container_width=True)
+            # Select column for the card
+            with card_cols[i % cards_per_row]:
+                st.markdown(f"""
+                <div style="
+                    border:1px solid #ccc; 
+                    border-radius:12px; 
+                    padding:16px; 
+                    margin:6px; 
+                    text-align:center;
+                    background: #f9f9f9;
+                    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+                ">
+                    <h4 style="margin:0 0 10px 0; color:#1f77b4;">{metric}</h4>
+                    <p style="margin:4px 0; font-size:16px; color:#1f77b4;"><b>First:</b> {first:.2f}</p>
+                    <p style="margin:4px 0; font-size:16px; color:#1f77b4;"><b>Latest:</b> {latest:.2f}</p>
+                    <p style="margin:4px 0; font-size:16px; font-weight:bold; color:{best_color};">
+                        <b>Best:</b> {best:.2f}
+                    </p>
+                    <p style="margin:4px 0; font-size:16px; font-weight:bold; color:{growth_color};">
+                        {arrow} {growth:.2f}
+                    </p>
+                    <p style="margin:4px 0; font-size:16px;"><b>Goal:</b> {goal if goal is not None else 'N/A'}</p>
+                </div>
+                """, unsafe_allow_html=True)
 
         
         # =========================
