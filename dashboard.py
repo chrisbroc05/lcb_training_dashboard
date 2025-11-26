@@ -260,6 +260,35 @@ with tab1:
         # RESULTS SUMMARY TABLE (FIRST, LATEST, BEST, GROWTH)
         # ===========================
         st.markdown("### 📘 Results Summary")
+        
+        rows = []
+        for metric in player_df["Metric_Type"].unique():
+            mdf = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
+        
+            first = mdf["Average"].iloc[0]
+            latest = mdf["Average"].iloc[-1]
+        
+            if metric in lower_is_better:
+                best = mdf["Average"].min()
+                growth = first - best  # improvement = decrease
+            else:
+                best = mdf["Average"].max()
+                growth = best - first  # improvement = increase
+        
+            goal = targets.get(age_group, {}).get(metric, None)
+        
+            rows.append({
+                "Metric": metric,
+                "First": first,
+                "Latest": latest,
+                "Best": best,
+                "Growth": growth,
+                "Goal": goal
+            })
+        
+        summary_df = pd.DataFrame(rows)
+        
+        st.markdown("### 📘 Results Summary")
 
         # Create 3 or 4 columns per row for the cards
         cards_per_row = 3
@@ -315,6 +344,8 @@ with tab1:
                     <p style="margin:4px 0; font-size:16px;"><b>Goal:</b> {goal if goal is not None else 'N/A'}</p>
                 </div>
                 """, unsafe_allow_html=True)
+
+
 
         
         # =========================
