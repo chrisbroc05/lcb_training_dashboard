@@ -256,9 +256,9 @@ with tab1:
 
             st.markdown("<hr>", unsafe_allow_html=True)
 
-        # =====================================================
+        # ===========================
         # RESULTS SUMMARY TABLE (FIRST, LATEST, BEST, GROWTH)
-        # =====================================================
+        # ===========================
         st.markdown("### 📘 Results Summary")
         
         rows = []
@@ -288,12 +288,26 @@ with tab1:
         
         summary_df = pd.DataFrame(rows)
         
-        # ---- FIXED: Format only the numeric columns ----
+        # ---- FORMAT NUMERIC COLUMNS ----
         numeric_cols = ["First", "Latest", "Best", "Growth", "Goal"]
         format_dict = {col: "{:.2f}" for col in numeric_cols if col in summary_df.columns}
         
-        st.dataframe(summary_df.style.format(format_dict), use_container_width=True)
+        # ---- CONDITIONAL FORMATTING FOR 'Best' ----
+        def color_best(val, metric):
+            goal_val = targets.get(age_group, {}).get(metric, None)
+            if goal_val is None:
+                return ""  # no formatting if no goal
+            if metric in lower_is_better:
+                return "color: green" if val <= goal_val else "color: red"
+            else:
+                return "color: green" if val >= goal_val else "color: red"
+        
+        summary_df_styled = summary_df.style.format(format_dict)\
+            .apply(lambda x: [color_best(v, x["Metric"]) for v in x], axis=1, subset=["Best"])
+        
+        st.dataframe(summary_df_styled, use_container_width=True)
         st.markdown("<hr>", unsafe_allow_html=True)
+
         
         # =========================
         # BEST PERFORMANCES TABLE
