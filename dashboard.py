@@ -45,11 +45,31 @@ df = load_data()
 lower_is_better = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
 
 targets = {
-    "8U": {"Bench":30,"Squat":50,"Pull Ups":2,"BES Tee":40,"BES Flip":35,"10 yard sprint":2.2,"Pro Agility":5.5,"Arm Speed Regular":35,"Arm Speed Pitch":30,"Home to 1B sprint":4.5},
-    "10U":{"Bench":40,"Squat":70,"Pull Ups":4,"BES Tee":50,"BES Flip":45,"10 yard sprint":2.0,"Pro Agility":5.0,"Arm Speed Regular":45,"Arm Speed Pitch":40,"Home to 1B sprint":4.2},
-    "12U":{"Bench":50,"Squat":90,"Pull Ups":6,"BES Tee":60,"BES Flip":55,"10 yard sprint":1.9,"Pro Agility":4.8,"Arm Speed Regular":55,"Arm Speed Pitch":50,"Home to 1B sprint":4.0},
-    "14U":{"Bench":70,"Squat":110,"Pull Ups":8,"BES Tee":70,"BES Flip":65,"10 yard sprint":1.8,"Pro Agility":4.6,"Arm Speed Regular":65,"Arm Speed Pitch":60,"Home to 1B sprint":3.9},
-    "16U":{"Bench":90,"Squat":140,"Pull Ups":10,"BES Tee":80,"BES Flip":75,"10 yard sprint":1.7,"Pro Agility":4.5,"Arm Speed Regular":75,"Arm Speed Pitch":70,"Home to 1B sprint":3.8}
+    "8U": {
+        "Bench": 30, "Squat": 50, "Pull Ups": 2, "Wall Sit": 15, "Plank": 20, "Push Ups": 5,
+        "10 yard sprint": 2.8, "Pro Agility": 5.8, "Home to 1B sprint": 6.0,
+        "Arm Speed Pitch": 30, "Arm Speed Regular": 35, "BES Flip": 45, "BES Tee": 40, "Broad Jump": 5
+    },
+    "10U": {
+        "Bench": 40, "Squat": 70, "Pull Ups": 4, "Wall Sit": 60, "Plank": 30, "Push Ups": 10,
+        "10 yard sprint": 2.3, "Pro Agility": 5.0, "Home to 1B sprint": 5.2,
+        "Arm Speed Pitch": 40, "Arm Speed Regular": 45, "BES Flip": 60, "BES Tee": 50, "Broad Jump": 6
+    },
+    "12U": {
+        "Bench": 50, "Squat": 90, "Pull Ups": 6, "Wall Sit": 90, "Plank": 40, "Push Ups": 15,
+        "10 yard sprint": 2.0, "Pro Agility": 4.9, "Home to 1B sprint": 5.0,
+        "Arm Speed Pitch": 50, "Arm Speed Regular": 55, "BES Flip": 65, "BES Tee": 60, "Broad Jump": 7
+    },
+    "14U": {
+        "Bench": 70, "Squat": 110, "Pull Ups": 8, "Wall Sit": 120, "Plank": 50, "Push Ups": 20,
+        "10 yard sprint": 1.9, "Pro Agility": 4.8, "Home to 1B sprint": 4.8,
+        "Arm Speed Pitch": 60, "Arm Speed Regular": 65, "BES Flip": 75, "BES Tee": 70, "Broad Jump": 7.5
+    },
+    "16U": {
+        "Bench": 90, "Squat": 140, "Pull Ups": 10, "Wall Sit": 180, "Plank": 60, "Push Ups": 25,
+        "10 yard sprint": 1.7, "Pro Agility": 4.5, "Home to 1B sprint": 4.3,
+        "Arm Speed Pitch": 70, "Arm Speed Regular": 75, "BES Flip": 90, "BES Tee": 80, "Broad Jump": 9
+    }
 }
 
 def get_age_group(age):
@@ -58,6 +78,7 @@ def get_age_group(age):
     elif age <= 12: return "12U"
     elif age <= 14: return "14U"
     return "16U"
+
 
 # =========================
 # GLOBAL STYLE
