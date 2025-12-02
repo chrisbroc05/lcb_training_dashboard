@@ -46,27 +46,27 @@ lower_is_better = {"10 yard sprint", "Pro Agility", "Home to 1B sprint"}
 
 targets = {
     "8U": {
-        "Bench": 45, "Squat": 70, "Pull Ups": 2, "Wall Sit": 15, "Plank": 20, "Push Ups": 5,
+        "Bench": 45, "Squat": 70, "Pull Ups": 2, "Wall Sit": 30, "Plank": 30, "Push Ups": 5,
         "10 yard sprint": 2.8, "Pro Agility": 5.8, "Home to 1B sprint": 6.0,
         "Arm Speed Pitch": 30, "Arm Speed Reg": 35, "BES Flip": 45, "BES Tee": 40, "Broad Jump": 5
     },
     "10U": {
-        "Bench": 65, "Squat": 90, "Pull Ups": 4, "Wall Sit": 60, "Plank": 30, "Push Ups": 10,
+        "Bench": 65, "Squat": 90, "Pull Ups": 4, "Wall Sit": 60, "Plank": 45, "Push Ups": 10,
         "10 yard sprint": 2.3, "Pro Agility": 5.0, "Home to 1B sprint": 5.2,
         "Arm Speed Pitch": 40, "Arm Speed Reg": 45, "BES Flip": 60, "BES Tee": 50, "Broad Jump": 6
     },
     "12U": {
-        "Bench": 90, "Squat": 120, "Pull Ups": 6, "Wall Sit": 90, "Plank": 40, "Push Ups": 15,
+        "Bench": 90, "Squat": 120, "Pull Ups": 6, "Wall Sit": 90, "Plank": 60, "Push Ups": 15,
         "10 yard sprint": 2.0, "Pro Agility": 4.9, "Home to 1B sprint": 5.0,
         "Arm Speed Pitch": 50, "Arm Speed Reg": 55, "BES Flip": 65, "BES Tee": 60, "Broad Jump": 7
     },
     "14U": {
-        "Bench": 120, "Squat": 135, "Pull Ups": 8, "Wall Sit": 120, "Plank": 50, "Push Ups": 20,
+        "Bench": 120, "Squat": 135, "Pull Ups": 8, "Wall Sit": 120, "Plank": 90, "Push Ups": 20,
         "10 yard sprint": 1.9, "Pro Agility": 4.8, "Home to 1B sprint": 4.8,
         "Arm Speed Pitch": 60, "Arm Speed Reg": 65, "BES Flip": 75, "BES Tee": 70, "Broad Jump": 7.5
     },
     "16U": {
-        "Bench": 135, "Squat": 180, "Pull Ups": 10, "Wall Sit": 180, "Plank": 60, "Push Ups": 25,
+        "Bench": 135, "Squat": 180, "Pull Ups": 10, "Wall Sit": 180, "Plank": 120, "Push Ups": 25,
         "10 yard sprint": 1.7, "Pro Agility": 4.5, "Home to 1B sprint": 4.3,
         "Arm Speed Pitch": 70, "Arm Speed Reg": 75, "BES Flip": 90, "BES Tee": 80, "Broad Jump": 9
     }
