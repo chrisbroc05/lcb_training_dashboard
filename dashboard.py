@@ -218,7 +218,7 @@ except:
 # =========================
 # TABS
 # =========================
-tab1, tab2, tab3 = st.tabs(["👤 Player", "👥 Team", "🏆 Leaderboard"])
+tab1, tab2, tab3 = st.tabs(["👤 Player", "👥 Team", "🏆 LCB Training Leaderboard"])
 
 # =============================================================
 # --------------------- PLAYER TAB ----------------------------
@@ -628,7 +628,7 @@ with tab2:
 # =============================================================
 with tab3:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("Leaderboard — Top Performers")
+    st.subheader("LCB Training Leaderboard — Top Performers")
 
     metric_list = sorted(df["Metric_Type"].unique())
     selected_metric = st.selectbox("Select Metric", metric_list)
