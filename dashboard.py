@@ -265,16 +265,14 @@ with tab1:
         for metric in player_df["Metric_Type"].unique():
             mdf = player_df[player_df["Metric_Type"] == metric].sort_values("Date")
         
-            first = mdf["Average"].iloc[0]
-            latest = mdf["Average"].iloc[-1]
-        
+            # ----- NEW LOGIC FOR FIRST & LATEST -----
             if metric in lower_is_better:
-                best = mdf["Average"].min()
-                growth = first - best  # improvement = decrease
+                first = mdf["Lowest"].iloc[0] if "Lowest" in mdf else mdf["Average"].iloc[0]
+                latest = mdf["Lowest"].iloc[-1] if "Lowest" in mdf else mdf["Average"].iloc[-1]
             else:
-                best = mdf["Average"].max()
-                growth = best - first  # improvement = increase
-        
+                first = mdf["Highest"].iloc[0] if "Highest" in mdf else mdf["Average"].iloc[0]
+                latest = mdf["Highest"].iloc[-1] if "Highest" in mdf else mdf["Average"].iloc[-1]
+
             goal = targets.get(age_group, {}).get(metric, None)
         
             rows.append({
@@ -319,7 +317,7 @@ with tab1:
         summary_data = []
         for metric in player_df["Metric_Type"].unique():
             df_metric = player_df[player_df["Metric_Type"] == metric]
-            best_score = df_metric["Average"].min() if metric in lower_is_better else df_metric["Average"].max()
+            best_score = df_metric["Lowest"].min() if metric in lower_is_better else df_metric["Highest"].max()
             summary_data.append({"Metric": metric, "Best Score": best_score})
         
         best_df = pd.DataFrame(summary_data)
@@ -351,14 +349,19 @@ with tab1:
             if mdf.empty:
                 return None, None, None
         
-            first = mdf["Average"].iloc[0]
-            latest = mdf["Average"].iloc[-1]
-        
+            # --- NEW LOGIC FOR FIRST & LATEST ---
             if metric in lower_is_better:
-                best = mdf["Average"].min()
+                first = mdf["Lowest"].iloc[0] if "Lowest" in mdf.columns else mdf["Average"].iloc[0]
+                latest = mdf["Lowest"].iloc[-1] if "Lowest" in mdf.columns else mdf["Average"].iloc[-1]
+            else:
+                first = mdf["Highest"].iloc[0] if "Highest" in mdf.columns else mdf["Average"].iloc[0]
+                latest = mdf["Highest"].iloc[-1] if "Highest" in mdf.columns else mdf["Average"].iloc[-1]
+
+            if metric in lower_is_better:
+                best = mdf["Lowest"].min()
                 growth = first - best   # lower = better
             else:
-                best = mdf["Average"].max()
+                best = mdf["Highest"].max()
                 growth = best - first   # higher = better
         
             return first, best, growth
@@ -379,7 +382,7 @@ with tab1:
             if not df_h1.empty:
                 fig_h1 = px.line(
                     df_h1.sort_values("Date"),
-                    x="Date", y="Average", color="Metric_Type",
+                    x="Date", y="Highest", color="Metric_Type",
                     markers=True,
                     title="Strength Performance (Jan - Jun)"
                 )
@@ -391,7 +394,7 @@ with tab1:
             if not df_h2.empty:
                 fig_h2 = px.line(
                     df_h2.sort_values("Date"),
-                    x="Date", y="Average", color="Metric_Type",
+                    x="Date", y="Highest", color="Metric_Type",
                     markers=True,
                     title="Strength Performance (Jul - Dec)"
                 )
@@ -447,7 +450,7 @@ with tab1:
             if not df_h1.empty:
                 fig_h1 = px.line(
                     df_h1.sort_values("Date"),
-                    x="Date", y="Average", color="Metric_Type",
+                    x="Date", y="Lowest", color="Metric_Type",
                     markers=True,
                     title="Speed & Agility Performance (Jan - Jun)"
                 )
@@ -459,7 +462,7 @@ with tab1:
             if not df_h2.empty:
                 fig_h2 = px.line(
                     df_h2.sort_values("Date"),
-                    x="Date", y="Average", color="Metric_Type",
+                    x="Date", y="Lowest", color="Metric_Type",
                     markers=True,
                     title="Speed & Agility Performance (Jul - Dec)"
                 )
