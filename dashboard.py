@@ -634,7 +634,7 @@ with tab3:
     selected_metric = st.selectbox("Select Metric", metric_list)
 
     df_metric = df[df["Metric_Type"] == selected_metric]
-    df_metric = df_metric.groupby("full_name").reset_index()
+    df_metric = df_metric.groupby("full_name")
 
     if selected_metric in lower_is_better:
         df_metric = df_metric.sort_values("Lowest", ascending=True)
