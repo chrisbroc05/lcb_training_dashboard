@@ -637,9 +637,9 @@ with tab3:
     df_metric = df_metric.groupby("full_name")["Average"].max().reset_index()
 
     if selected_metric in lower_is_better:
-        df_metric = df_metric.sort_values("Average", ascending=True)
+        df_metric = df_metric.sort_values("Lowest", ascending=True)
     else:
-        df_metric = df_metric.sort_values("Average", ascending=False)
+        df_metric = df_metric.sort_values("Highest", ascending=False)
 
     st.dataframe(df_metric.head(15), use_container_width=True)
 
