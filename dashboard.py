@@ -273,6 +273,14 @@ with tab1:
                 first = mdf["Highest"].iloc[0] if "Highest" in mdf else mdf["Average"].iloc[0]
                 latest = mdf["Highest"].iloc[-1] if "Highest" in mdf else mdf["Average"].iloc[-1]
 
+            # Best logic stays the same
+            if metric in lower_is_better:
+                best = mdf["Lowest"].min()
+                growth = first - best  
+            else:
+                best = mdf["Highest"].max()
+                growth = best - first
+
             goal = targets.get(age_group, {}).get(metric, None)
         
             rows.append({
