@@ -630,17 +630,37 @@ with tab3:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("LCB Training Leaderboard — Top Performers")
 
+    # Select metric
     metric_list = sorted(df["Metric_Type"].unique())
     selected_metric = st.selectbox("Select Metric", metric_list)
 
+    # Filter data for selected metric
     df_metric = df[df["Metric_Type"] == selected_metric]
-    df_metric = df_metric.groupby("full_name")
 
+    # Build leaderboard rows
+    rows = []
+    for player, pdf in df_metric.groupby("full_name"):
+        pdf = pdf.sort_values("Date")
+
+        # Apply highest/lowest rules
+        if selected_metric in lower_is_better:
+            value = pdf["Average"].min()     # lowest is best
+            rows.append({"full_name": player, "Lowest": value})
+        else:
+            value = pdf["Average"].max()     # highest is best
+            rows.append({"full_name": player, "Highest": value})
+
+    # Convert to DataFrame
+    leaderboard = pd.DataFrame(rows)
+
+    # Sorting
     if selected_metric in lower_is_better:
-        df_metric = df_metric.sort_values("Lowest", ascending=True)
+        leaderboard = leaderboard.sort_values("Lowest", ascending=True)
     else:
-        df_metric = df_metric.sort_values("Highest", ascending=False)
+        leaderboard = leaderboard.sort_values("Highest", ascending=False)
 
-    st.dataframe(df_metric.head(15), use_container_width=True)
+    # Display top 15
+    st.dataframe(leaderboard.head(15), use_container_width=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
+
