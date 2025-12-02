@@ -630,36 +630,44 @@ with tab3:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("LCB Training Leaderboard — Top Performers")
 
-    # Select metric
+    # ---- Metric Filter ----
     metric_list = sorted(df["Metric_Type"].unique())
     selected_metric = st.selectbox("Select Metric", metric_list)
 
-    # Filter data for selected metric
-    df_metric = df[df["Metric_Type"] == selected_metric]
+    # ---- Age Filter ----
+    age_options = ["All Ages"] + sorted(df["Age"].unique())
+    selected_age = st.selectbox("Filter by Age", age_options)
 
-    # Build leaderboard rows
+    # Apply age filter
+    if selected_age != "All Ages":
+        df_filtered = df[df["Age"] <= int(selected_age)]
+    else:
+        df_filtered = df.copy()
+
+    # ---- Filter data for selected metric ----
+    df_metric = df_filtered[df_filtered["Metric_Type"] == selected_metric]
+
+    # ---- Build leaderboard rows ----
     rows = []
     for player, pdf in df_metric.groupby("full_name"):
         pdf = pdf.sort_values("Date")
 
-        # Apply highest/lowest rules
         if selected_metric in lower_is_better:
-            value = pdf["Average"].min()     # lowest is best
-            rows.append({"full_name": player, "Lowest": value})
+            value = pdf["Average"].min()  # lowest is better
+            rows.append({"full_name": player, "Age": pdf["Age"].iloc[-1], "Lowest": value})
         else:
-            value = pdf["Average"].max()     # highest is best
-            rows.append({"full_name": player, "Highest": value})
+            value = pdf["Average"].max()  # highest is better
+            rows.append({"full_name": player, "Age": pdf["Age"].iloc[-1], "Highest": value})
 
-    # Convert to DataFrame
     leaderboard = pd.DataFrame(rows)
 
-    # Sorting
+    # ---- Sorting ----
     if selected_metric in lower_is_better:
         leaderboard = leaderboard.sort_values("Lowest", ascending=True)
     else:
         leaderboard = leaderboard.sort_values("Highest", ascending=False)
 
-    # Display top 15
+    # ---- Display top performers ----
     st.dataframe(leaderboard.head(15), use_container_width=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
