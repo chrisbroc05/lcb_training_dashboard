@@ -7,6 +7,12 @@ import plotly.graph_objects as go
 from PIL import Image
 import base64
 from io import BytesIO
+from reportlab.lib.pagesizes import LETTER
+from reportlab.pdfgen import canvas
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Table, TableStyle, Paragraph
+from reportlab.lib import colors
+import tempfile
 
 # =========================
 # LOAD GOOGLE SHEETS
@@ -78,6 +84,65 @@ def get_age_group(age):
     elif age <= 12: return "12U"
     elif age <= 14: return "14U"
     return "16U"
+
+# =============================
+# PDF Summary page
+# =============================
+
+def create_player_summary_pdf(player_name, player_df, age_group, team):
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+
+    c = canvas.Canvas(temp_file.name, pagesize=LETTER)
+    width, height = LETTER
+
+    # ---- Header ----
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(40, height - 50, "LCB Training Performance Summary")
+
+    c.setFont("Helvetica", 12)
+    c.drawString(40, height - 80, f"Player: {player_name}")
+    c.drawString(40, height - 100, f"Team: {team}")
+    c.drawString(40, height - 120, f"Age Group: {age_group}")
+
+    # ---- Build summary table ----
+    table_data = [["Metric", "Best", "Goal", "Status"]]
+
+    for metric in sorted(player_df["Metric_Type"].unique()):
+        mdf = player_df[player_df["Metric_Type"] == metric]
+
+        if metric in lower_is_better:
+            best = mdf["Lowest"].min()
+            goal = targets.get(age_group, {}).get(metric)
+            status = "Met" if goal and best <= goal else "Needs Work"
+        else:
+            best = mdf["Highest"].max()
+            goal = targets.get(age_group, {}).get(metric)
+            status = "Met" if goal and best >= goal else "Needs Work"
+
+        table_data.append([
+            metric,
+            f"{best:.2f}",
+            f"{goal:.2f}" if goal else "—",
+            status
+        ])
+
+    table = Table(table_data, colWidths=[160, 80, 80, 100])
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.black),
+        ("TEXTCOLOR", (-1,1), (-1,-1), colors.green),
+        ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+        ("FONT", (0,0), (-1,0), "Helvetica-Bold"),
+        ("ALIGN", (1,1), (-1,-1), "CENTER"),
+    ]))
+
+    table.wrapOn(c, width, height)
+    table.drawOn(c, 40, height - 500)
+
+    c.showPage()
+    c.save()
+
+    return temp_file.name
+
 
 
 # =========================
@@ -243,6 +308,22 @@ with tab1:
             player_age = int(most_recent["Age"]) if not pd.isna(most_recent["Age"]) else None
             player_team = most_recent["Team"] if str(most_recent["Team"]) != "nan" else "N/A"
             age_group = get_age_group(player_age) if player_age else "N/A"
+
+            if st.button("Create Summary Report"):
+            pdf_path = create_player_summary_pdf(
+                selected_player,
+                player_df,
+                age_group,
+                player_team
+            )
+        
+            with open(pdf_path, "rb") as f:
+                st.download_button(
+                    "⬇️ Download Player Report (PDF)",
+                    f,
+                    file_name=f"{selected_player.replace(' ', '_')}_LCB_Report.pdf",
+                    mime="application/pdf"
+                )
 
             # ---------------------------
             # PLAYER SUMMARY
