@@ -309,21 +309,24 @@ with tab1:
             player_team = most_recent["Team"] if str(most_recent["Team"]) != "nan" else "N/A"
             age_group = get_age_group(player_age) if player_age else "N/A"
 
-            if st.button("Create Summary Report"):
-            pdf_path = create_player_summary_pdf(
-                selected_player,
-                player_df,
-                age_group,
-                player_team
-            )
-        
-            with open(pdf_path, "rb") as f:
-                st.download_button(
-                    "⬇️ Download Player Report (PDF)",
-                    f,
-                    file_name=f"{selected_player.replace(' ', '_')}_LCB_Report.pdf",
-                    mime="application/pdf"
+            # ---------------------------
+            # PDF GENERATION
+            # ---------------------------
+            if st.button("📄 Create Summary Report"):
+                pdf_path = create_player_summary_pdf(
+                    selected_player,
+                    player_df,
+                    age_group,
+                    player_team
                 )
+
+                with open(pdf_path, "rb") as f:
+                    st.download_button(
+                        "⬇️ Download Player Report (PDF)",
+                        f,
+                        file_name=f"{selected_player.replace(' ', '_')}_LCB_Report.pdf",
+                        mime="application/pdf"
+                    )
 
             # ---------------------------
             # PLAYER SUMMARY
