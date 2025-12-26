@@ -54,12 +54,12 @@ targets = {
     "8U": {
         "Bench": 45, "Squat": 70, "Pull Ups": 2, "Wall Sit": 30, "Plank": 30, "Push Ups": 5,
         "10 yard sprint": 2.8, "Pro Agility": 5.8, "Home to 1B sprint": 6.0,
-        "Arm Speed Pitch": 30, "Arm Speed Reg": 35, "BES Flip": 45, "BES Tee": 40, "Broad Jump": 5
+        "Arm Speed Pitch": 30, "Arm Speed Reg": 35, "BES Flip": 50, "BES Tee": 45, "Broad Jump": 5
     },
     "10U": {
         "Bench": 65, "Squat": 90, "Pull Ups": 4, "Wall Sit": 60, "Plank": 45, "Push Ups": 10,
         "10 yard sprint": 2.3, "Pro Agility": 5.0, "Home to 1B sprint": 5.2,
-        "Arm Speed Pitch": 40, "Arm Speed Reg": 45, "BES Flip": 60, "BES Tee": 50, "Broad Jump": 6
+        "Arm Speed Pitch": 40, "Arm Speed Reg": 45, "BES Flip": 60, "BES Tee": 55, "Broad Jump": 6
     },
     "12U": {
         "Bench": 90, "Squat": 120, "Pull Ups": 6, "Wall Sit": 90, "Plank": 60, "Push Ups": 15,
@@ -84,6 +84,70 @@ def get_age_group(age):
     elif age <= 12: return "12U"
     elif age <= 14: return "14U"
     return "16U"
+
+hitting_thresholds = {
+    "8U":  {"C": 40, "B": 50, "A": 60},
+    "10U": {"C": 50, "B": 60, "A": 70},
+    "12U": {"C": 60, "B": 70, "A": 80},
+    "14U": {"C": 70, "B": 80, "A": 90},
+    "16U": {"C": 80, "B": 90, "A": 95},
+}
+
+# =========================
+# Player Grades
+# =========================
+def get_hitting_grade(player_df, age_group):
+    thresholds = hitting_thresholds.get(age_group)
+    if not thresholds:
+        return "—"
+
+    bes_values = []
+
+    if "BES Tee" in player_df["Metric_Type"].values:
+        bes_values.append(player_df[player_df["Metric_Type"] == "BES Tee"]["Highest"].max())
+
+    if "BES Flip" in player_df["Metric_Type"].values:
+        bes_values.append(player_df[player_df["Metric_Type"] == "BES Flip"]["Highest"].max())
+
+    if not bes_values:
+        return "—"
+
+    best_bes = max(bes_values)
+
+    if best_bes >= thresholds["A"]:
+        return "A"
+    elif best_bes >= thresholds["B"]:
+        return "B"
+    elif best_bes >= thresholds["C"]:
+        return "C"
+    else:
+        return "D"
+
+
+def get_speed_grade(player_df, age_group):
+    speed_metrics = ["10 yard sprint", "Pro Agility", "Home to 1B sprint"]
+    goals = targets.get(age_group, {})
+    met = 0
+
+    for metric in speed_metrics:
+        if metric not in player_df["Metric_Type"].values:
+            continue
+
+        mdf = player_df[player_df["Metric_Type"] == metric]
+        best = mdf["Lowest"].min()
+
+        if metric in goals and best <= goals[metric]:
+            met += 1
+
+    if met == 3:
+        return "A"
+    elif met == 2:
+        return "B"
+    elif met == 1:
+        return "C"
+    else:
+        return "D"
+
 
 # =========================
 # PDF Summary
@@ -126,7 +190,7 @@ def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, growth, tre
     c.drawString(x + 10, y + h - 76, f"Goal: {goal_text}")
 
     # Status
-    status_color = colors.green if status == "Met" else colors.red
+    status_color = colors.green if status == "Goal Met" else colors.red
     c.setFillColor(status_color)
     c.drawString(x + 10, y + h - 94, f"Status: {status}")
 
@@ -150,14 +214,34 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
 
     # ---- TITLE ----
     c.setFont("Helvetica-Bold", 20)
-    c.drawString(130, height - 55, "LCB Training Performance Summary")
+    c.drawString(160, height - 55, "LCB Training Performance Summary")
 
-    # ---- PLAYER INFO ----
-    c.setFont("Helvetica", 12)
+    # ---- PLAYER PROFILE BOX ----
+    box_y = height - 210
+    
+    c.setFillColor(colors.whitesmoke)
+    c.rect(40, box_y, 520, 80, stroke=0, fill=1)
+    
+    # Left: Player Info
+    c.setFont("Helvetica-Bold", 14)
     c.setFillColor(colors.black)
-    c.drawString(40, height - 120, f"Player: {player_name}")
-    c.drawString(40, height - 140, f"Team: {team}")
-    c.drawString(40, height - 160, f"Age Group: {age_group}")
+    c.drawString(50, box_y + 55, player_name)
+    
+    c.setFont("Helvetica", 11)
+    c.drawString(50, box_y + 35, f"Team: {team}")
+    c.drawString(50, box_y + 20, f"Age Group: {age_group}")
+    
+    # Right: Grades
+    hitting_grade = get_hitting_grade(player_df, age_group)
+    speed_grade = get_speed_grade(player_df, age_group)
+    
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(330, box_y + 50, "Performance Grades")
+    
+    c.setFont("Helvetica", 11)
+    c.drawString(330, box_y + 30, f"Hitting:  {hitting_grade}")
+    c.drawString(330, box_y + 15, f"Speed & Agility:  {speed_grade}")
+
 
     # ---- SCORECARDS ----
     card_width = 250
@@ -181,13 +265,13 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
             first = mdf.sort_values("Date")["Lowest"].iloc[0]
             growth = first - best   # improvement if positive
             trend_up = growth > 0
-            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best <= targets[age_group][metric] else "Needs Work"
+            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best <= targets[age_group][metric] else "Keep Improving - Almost there"
         else:
             best = mdf["Highest"].max()
             first = mdf.sort_values("Date")["Highest"].iloc[0]
             growth = best - first   # improvement if positive
             trend_up = growth > 0
-            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best >= targets[age_group][metric] else "Needs Work"
+            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best >= targets[age_group][metric] else "Keep Improving - Almost there"
 
         goal = targets.get(age_group, {}).get(metric)
 
@@ -262,6 +346,62 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.save()
 
     return temp_file.name
+
+# =========================
+# Player Grades
+# =========================
+def get_hitting_grade(player_df, age_group):
+    thresholds = hitting_thresholds.get(age_group)
+    if not thresholds:
+        return "—"
+
+    bes_values = []
+
+    if "BES Tee" in player_df["Metric_Type"].values:
+        bes_values.append(player_df[player_df["Metric_Type"] == "BES Tee"]["Highest"].max())
+
+    if "BES Flip" in player_df["Metric_Type"].values:
+        bes_values.append(player_df[player_df["Metric_Type"] == "BES Flip"]["Highest"].max())
+
+    if not bes_values:
+        return "—"
+
+    best_bes = max(bes_values)
+
+    if best_bes >= thresholds["A"]:
+        return "A"
+    elif best_bes >= thresholds["B"]:
+        return "B"
+    elif best_bes >= thresholds["C"]:
+        return "C"
+    else:
+        return "D"
+
+
+def get_speed_grade(player_df, age_group):
+    speed_metrics = ["10 yard sprint", "Pro Agility", "Home to 1B sprint"]
+    goals = targets.get(age_group, {})
+    met = 0
+
+    for metric in speed_metrics:
+        if metric not in player_df["Metric_Type"].values:
+            continue
+
+        mdf = player_df[player_df["Metric_Type"] == metric]
+        best = mdf["Lowest"].min()
+
+        if metric in goals and best <= goals[metric]:
+            met += 1
+
+    if met == 3:
+        return "A"
+    elif met == 2:
+        return "B"
+    elif met == 1:
+        return "C"
+    else:
+        return "D"
+
 
 
 # =========================
