@@ -215,21 +215,39 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
             row += 1
 
     # ---- COACH NOTES BOX ----
+    box_x = 40
+    box_y = 100
+    box_width = 520
+    box_height = 90
+    
+    # Draw box with light background
+    c.setFillColor(colors.whitesmoke)
+    c.rect(box_x, box_y, box_width, box_height, stroke=1, fill=1)
+    
+    # Draw header
     c.setFont("Helvetica-Bold", 12)
     c.setFillColor(colors.black)
-    c.drawString(40, 200, "Coach Broc Notes:")
-
-    # Draw a box
-    c.setStrokeColor(colors.grey)
-    c.rect(40, 100, 520, 90, stroke=1, fill=0)
-
-    # Add the actual notes inside the box
+    c.drawString(box_x + 5, box_y + box_height - 20, "Coach Broc Notes:")
+    
+    # Add wrapped notes inside the box
     if coach_notes:
+        from reportlab.lib.utils import simpleSplit
+    
         c.setFont("Helvetica", 10)
-        text_object = c.beginText(45, 185)
-        for line in coach_notes.split("\n"):
-            text_object.textLine(line)
-        c.drawText(text_object)
+        c.setFillColor(colors.black)
+    
+        # Wrap text to fit inside box width minus some padding
+        wrapped_lines = simpleSplit(coach_notes, c._fontname, c._fontsize, box_width - 10)
+    
+        # Center vertically
+        start_y = box_y + box_height - 35  # start below header
+        line_height = 12
+        for line in wrapped_lines:
+            c.drawString(box_x + 5, start_y, line)
+            start_y -= line_height
+            if start_y < box_y + 5:  # stop if we reach bottom of box
+                break
+
 
     # ---- FOOTER ----
     c.setFont("Helvetica-Oblique", 9)
