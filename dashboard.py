@@ -102,11 +102,11 @@ CARD_METRICS = [
 def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, trend_up):
     # Card background
     c.setFillColor(colors.whitesmoke)
-    c.roundRect(x, y, w, h, 10, fill=1)
+    c.roundRect(x, y, w, h, 20, fill=1)
 
     # Border
     c.setStrokeColor(colors.grey)
-    c.roundRect(x, y, w, h, 10, fill=0)
+    c.roundRect(x, y, w, h, 20, fill=0)
 
     # Metric title
     c.setFont("Helvetica-Bold", 11)
@@ -115,7 +115,7 @@ def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, trend_up):
 
     # First value
     c.setFont("Helvetica", 10)
-    c.drawString(x + 10, y + h - 40, f"Best: {best:.2f}")
+    c.drawString(x + 10, y + h - 40, f"First: {First:.2f}")
 
     # Best value
     c.setFont("Helvetica", 10)
@@ -160,7 +160,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
 
     # ---- SCORECARDS ----
     card_width = 250
-    card_height = 95
+    card_height = 115
     start_x = 40
     start_y = height - 240
     gap_x = 20
