@@ -228,7 +228,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(160, height - 55, "LCB Training Performance Summary")
 
     # ---- PLAYER PROFILE BOX ----
-    box_y = height - 180
+    box_y = height - 175
     
     c.setFillColor(colors.whitesmoke)
     c.rect(40, box_y, 520, 80, stroke=0, fill=1)
