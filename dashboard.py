@@ -205,6 +205,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
             best=best,
             goal=goal,
             status=status,
+            growth=growth,
             trend_up=trend_up
         )
 
