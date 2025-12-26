@@ -58,7 +58,7 @@ targets = {
     },
     "10U": {
         "Bench": 65, "Squat": 90, "Pull Ups": 4, "Wall Sit": 60, "Plank": 45, "Push Ups": 10,
-        "10 yard sprint": 2.3, "Pro Agility": 5.0, "Home to 1B sprint": 5.2,
+        "10 yard sprint": 2.3, "Pro Agility": 5.2, "Home to 1B sprint": 5.2,
         "Arm Speed Pitch": 40, "Arm Speed Reg": 45, "BES Flip": 60, "BES Tee": 55, "Broad Jump": 6
     },
     "12U": {
@@ -73,7 +73,7 @@ targets = {
     },
     "16U": {
         "Bench": 135, "Squat": 180, "Pull Ups": 10, "Wall Sit": 180, "Plank": 120, "Push Ups": 25,
-        "10 yard sprint": 1.7, "Pro Agility": 4.5, "Home to 1B sprint": 4.3,
+        "10 yard sprint": 1.7, "Pro Agility": 4.7, "Home to 1B sprint": 4.3,
         "Arm Speed Pitch": 70, "Arm Speed Reg": 75, "BES Flip": 90, "BES Tee": 80, "Broad Jump": 9
     }
 }
@@ -270,13 +270,13 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
             first = mdf.sort_values("Date")["Lowest"].iloc[0]
             growth = first - best   # improvement if positive
             trend_up = growth > 0
-            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best <= targets[age_group][metric] else "Keep Improving - Almost there"
+            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best <= targets[age_group][metric] else "Goal Not Met - Keep Working"
         else:
             best = mdf["Highest"].max()
             first = mdf.sort_values("Date")["Highest"].iloc[0]
             growth = best - first   # improvement if positive
             trend_up = growth > 0
-            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best >= targets[age_group][metric] else "Keep Improving - Almost there"
+            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best >= targets[age_group][metric] else "Goal Not Met - Keep Working"
 
         goal = targets.get(age_group, {}).get(metric)
 
@@ -316,13 +316,13 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     # Draw header
     c.setFont("Helvetica-Bold", 12)
     c.setFillColor(colors.black)
-    c.drawString(box_x + 5, box_y + box_height - 20, "Coach Broc Notes:")
+    c.drawString(box_x + 8, box_y + box_height - 20, "Coach Broc Notes:")
     
     # Add wrapped notes inside the box
     if coach_notes:
         from reportlab.lib.utils import simpleSplit
     
-        c.setFont("Helvetica", 10)
+        c.setFont("Helvetica", 12)
         c.setFillColor(colors.black)
     
         # Wrap text to fit inside box width minus some padding
@@ -332,9 +332,9 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
         start_y = box_y + box_height - 35  # start below header
         line_height = 12
         for line in wrapped_lines:
-            c.drawString(box_x + 5, start_y, line)
+            c.drawString(box_x + 8, start_y, line)
             start_y -= line_height
-            if start_y < box_y + 5:  # stop if we reach bottom of box
+            if start_y < box_y + 8:  # stop if we reach bottom of box
                 break
 
 
