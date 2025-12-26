@@ -86,17 +86,16 @@ def get_age_group(age):
     return "16U"
 
 # =============================
-# PDF Summary page
+# PERFORMANCE CHART (SAFE)
 # =============================
-
 def create_performance_chart(player_df, age_group):
     rows = []
 
     for metric in sorted(player_df["Metric_Type"].unique()):
         if metric in lower_is_better:
-            best = player_df[player_df["Metric_Type"] == metric]["Lowest"].min()
+            best = player_df.loc[player_df["Metric_Type"] == metric, "Lowest"].min()
         else:
-            best = player_df[player_df["Metric_Type"] == metric]["Highest"].max()
+            best = player_df.loc[player_df["Metric_Type"] == metric, "Highest"].max()
 
         goal = targets.get(age_group, {}).get(metric)
         if goal is not None:
@@ -105,6 +104,9 @@ def create_performance_chart(player_df, age_group):
                 "Best": best,
                 "Goal": goal
             })
+
+    if not rows:
+        return None
 
     df_chart = pd.DataFrame(rows)
 
@@ -117,21 +119,30 @@ def create_performance_chart(player_df, age_group):
     )
     fig.update_layout(height=350)
 
-    img_bytes = fig.to_image(format="png")
-    img = Image.open(BytesIO(img_bytes))
+    try:
+        img_bytes = fig.to_image(format="png")
+        img = Image.open(BytesIO(img_bytes))
 
-    temp_img = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-    img.save(temp_img.name)
+        temp_img = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+        img.save(temp_img.name)
 
-    return temp_img.name
+        return temp_img.name
 
+    except Exception as e:
+        # Cloud-safe fallback
+        return None
+
+
+# =============================
+# PLAYER SUMMARY PDF
+# =============================
 def create_player_summary_pdf(player_name, player_df, age_group, team):
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     c = canvas.Canvas(temp_file.name, pagesize=LETTER)
     width, height = LETTER
 
     # ---- LOGO ----
-    logo_path = "lcb training logo.png"  # keep in repo root or /assets
+    logo_path = "lcb training logo.png"
     c.drawImage(logo_path, 40, height - 90, width=70, height=70, mask="auto")
 
     # ---- TITLE ----
@@ -144,15 +155,24 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
     c.drawString(40, height - 140, f"Team: {team}")
     c.drawString(40, height - 160, f"Age Group: {age_group}")
 
-    # ---- CHART ----
+    # ---- CHART (OPTIONAL) ----
     chart_path = create_performance_chart(player_df, age_group)
-    c.drawImage(chart_path, 40, height - 430, width=520, height=250)
+
+    if chart_path:
+        c.drawImage(chart_path, 40, height - 430, width=520, height=250)
+        table_y = height - 720
+    else:
+        # No chart available → move table up
+        c.setFont("Helvetica-Oblique", 10)
+        c.setFillColor(colors.grey)
+        c.drawString(40, height - 200, "Chart unavailable in this environment.")
+        table_y = height - 450
 
     # ---- TABLE ----
     table_data = [["Metric", "Best", "Goal", "Status"]]
 
     for metric in sorted(player_df["Metric_Type"].unique()):
-        mdf = player_df[player_df["Metric_Type"] == metric]
+        mdf = player_df.loc[player_df["Metric_Type"] == metric]
 
         if metric in lower_is_better:
             best = mdf["Lowest"].min()
@@ -172,12 +192,12 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
 
     table = Table(table_data, colWidths=[160, 80, 80, 100])
     table.setStyle(TableStyle([
-        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#1f2937")),
-        ("TEXTCOLOR", (0,0), (-1,0), colors.white),
-        ("FONT", (0,0), (-1,0), "Helvetica-Bold"),
-        ("GRID", (0,0), (-1,-1), 0.25, colors.grey),
-        ("ALIGN", (1,1), (-1,-1), "CENTER"),
-        ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.whitesmoke, colors.lightgrey]),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1f2937")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONT", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
+        ("ALIGN", (1, 1), (-1, -1), "CENTER"),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
     ]))
 
     for i, row in enumerate(table_data[1:], start=1):
@@ -185,7 +205,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
         table.setStyle([("TEXTCOLOR", (-1, i), (-1, i), color)])
 
     table.wrapOn(c, width, height)
-    table.drawOn(c, 40, height - 720)
+    table.drawOn(c, 40, table_y)
 
     # ---- FOOTER ----
     c.setFont("Helvetica-Oblique", 9)
