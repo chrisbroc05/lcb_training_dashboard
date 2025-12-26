@@ -99,7 +99,7 @@ CARD_METRICS = [
 ]
 
 
-def draw_scorecard(c, x, y, w, h, metric, best, goal, status, trend_up):
+def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, trend_up):
     # Card background
     c.setFillColor(colors.whitesmoke)
     c.roundRect(x, y, w, h, 10, fill=1)
@@ -113,21 +113,25 @@ def draw_scorecard(c, x, y, w, h, metric, best, goal, status, trend_up):
     c.setFillColor(colors.black)
     c.drawString(x + 10, y + h - 20, metric)
 
-    # Best value
+    # First value
     c.setFont("Helvetica", 10)
     c.drawString(x + 10, y + h - 40, f"Best: {best:.2f}")
 
+    # Best value
+    c.setFont("Helvetica", 10)
+    c.drawString(x + 10, y + h - 58, f"Best: {best:.2f}")
+
     # Goal
     goal_text = f"{goal:.2f}" if goal is not None else "—"
-    c.drawString(x + 10, y + h - 58, f"Goal: {goal_text}")
+    c.drawString(x + 10, y + h - 76, f"Goal: {goal_text}")
 
     # Status
     status_color = colors.green if status == "Met" else colors.red
     c.setFillColor(status_color)
-    c.drawString(x + 10, y + h - 76, f"Status: {status}")
+    c.drawString(x + 10, y + h - 94, f"Status: {status}")
 
     # Trend arrow
-    arrow = "▲ Improving" if trend_up else "▼ Needs Work"
+    arrow = "▲" if trend_up else "▼"
     arrow_color = colors.green if trend_up else colors.red
     c.setFillColor(arrow_color)
     c.setFont("Helvetica-Bold", 12)
@@ -194,6 +198,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
             w=card_width,
             h=card_height,
             metric=metric,
+            first=first,
             best=best,
             goal=goal,
             status=status,
