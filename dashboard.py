@@ -131,7 +131,7 @@ def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, trend_up):
     c.drawString(x + 10, y + h - 94, f"Status: {status}")
 
     # Trend arrow
-    arrow = "▲" if trend_up else "▼"
+    arrow = "{growth} ▲" if trend_up else "{growth} ▼"
     arrow_color = colors.green if trend_up else colors.red
     c.setFillColor(arrow_color)
     c.setFont("Helvetica-Bold", 12)
@@ -179,11 +179,13 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
             best = mdf["Lowest"].min()
             first = mdf.sort_values("Date")["Lowest"].iloc[0]
             trend_up = best < first
+            growth = first - best
             status = "Met" if targets.get(age_group, {}).get(metric) and best <= targets[age_group][metric] else "Needs Work"
         else:
             best = mdf["Highest"].max()
             first = mdf.sort_values("Date")["Highest"].iloc[0]
             trend_up = best > first
+            growth = best - first
             status = "Met" if targets.get(age_group, {}).get(metric) and best >= targets[age_group][metric] else "Needs Work"
 
         goal = targets.get(age_group, {}).get(metric)
