@@ -9,7 +9,7 @@ import base64
 from io import BytesIO
 from reportlab.lib.pagesizes import LETTER
 from reportlab.pdfgen import canvas
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import Table, TableStyle, Paragraph
 from reportlab.lib import colors
 import tempfile
@@ -139,7 +139,7 @@ def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, growth, tre
     c.drawRightString(x + w - 10, y + 15, arrow)
 
 
-def create_player_summary_pdf(player_name, player_df, age_group, team):
+def create_player_summary_pdf(player_name, player_df, age_group, team, coach_notes=""):
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     c = canvas.Canvas(temp_file.name, pagesize=LETTER)
     width, height = LETTER
@@ -161,9 +161,9 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
 
     # ---- SCORECARDS ----
     card_width = 250
-    card_height = 115
+    card_height = 110
     start_x = 40
-    start_y = height - 280
+    start_y = height - 320
     gap_x = 20
     gap_y = 20
 
@@ -181,13 +181,13 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
             first = mdf.sort_values("Date")["Lowest"].iloc[0]
             growth = first - best   # improvement if positive
             trend_up = growth > 0
-            status = "Met" if targets.get(age_group, {}).get(metric) and best <= targets[age_group][metric] else "Needs Work"
+            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best <= targets[age_group][metric] else "Needs Work"
         else:
             best = mdf["Highest"].max()
             first = mdf.sort_values("Date")["Highest"].iloc[0]
             growth = best - first   # improvement if positive
             trend_up = growth > 0
-            status = "Met" if targets.get(age_group, {}).get(metric) and best >= targets[age_group][metric] else "Needs Work"
+            status = "Goal Met" if targets.get(age_group, {}).get(metric) and best >= targets[age_group][metric] else "Needs Work"
 
         goal = targets.get(age_group, {}).get(metric)
 
@@ -213,6 +213,36 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
         if col > 1:
             col = 0
             row += 1
+
+    # ---- COACH NOTES SECTION ----
+    notes_y = 110  # vertical position above footer
+    box_height = 70
+    
+    # Draw box
+    c.setStrokeColor(colors.HexColor("#1f2937"))
+    c.setLineWidth(1)
+    c.rect(40, notes_y, width - 80, box_height)
+    
+    # Header
+    c.setFont("Helvetica-Bold", 11)
+    c.setFillColor(colors.HexColor("#1f2937"))
+    c.drawString(50, notes_y + box_height - 15, "Coach Broc Notes")
+    
+    # Notes text
+    styles = getSampleStyleSheet()
+    note_style = ParagraphStyle(
+        "CoachNotes",
+        parent=styles["Normal"],
+        fontSize=9,
+        leading=12,
+        textColor=colors.black
+    )
+    
+    notes_text = coach_notes if coach_notes else "—"
+    paragraph = Paragraph(notes_text, note_style)
+    paragraph.wrap(width - 100, box_height - 30)
+    paragraph.drawOn(c, 50, notes_y + 10)
+
 
     # ---- FOOTER ----
     c.setFont("Helvetica-Oblique", 9)
