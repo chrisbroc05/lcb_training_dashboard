@@ -359,63 +359,6 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     return temp_file.name
 
 # =========================
-# Player Grades
-# =========================
-def get_hitting_grade(player_df, age_group):
-    thresholds = hitting_thresholds.get(age_group)
-    if not thresholds:
-        return "—"
-
-    bes_values = []
-
-    if "BES Tee" in player_df["Metric_Type"].values:
-        bes_values.append(player_df[player_df["Metric_Type"] == "BES Tee"]["Highest"].max())
-
-    if "BES Flip" in player_df["Metric_Type"].values:
-        bes_values.append(player_df[player_df["Metric_Type"] == "BES Flip"]["Highest"].max())
-
-    if not bes_values:
-        return "—"
-
-    best_bes = max(bes_values)
-
-    if best_bes >= thresholds["A"]:
-        return "A"
-    elif best_bes >= thresholds["B"]:
-        return "B"
-    elif best_bes >= thresholds["C"]:
-        return "C"
-    else:
-        return "D"
-
-
-def get_speed_grade(player_df, age_group):
-    speed_metrics = ["10 yard sprint", "Pro Agility", "Home to 1B sprint"]
-    goals = targets.get(age_group, {})
-    met = 0
-
-    for metric in speed_metrics:
-        if metric not in player_df["Metric_Type"].values:
-            continue
-
-        mdf = player_df[player_df["Metric_Type"] == metric]
-        best = mdf["Lowest"].min()
-
-        if metric in goals and best <= goals[metric]:
-            met += 1
-
-    if met == 3:
-        return "A"
-    elif met == 2:
-        return "B"
-    elif met == 1:
-        return "C"
-    else:
-        return "D"
-
-
-
-# =========================
 # GLOBAL STYLE
 # =========================
 st.markdown("""
