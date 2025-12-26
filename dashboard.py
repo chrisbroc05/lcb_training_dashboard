@@ -85,57 +85,55 @@ def get_age_group(age):
     elif age <= 14: return "14U"
     return "16U"
 
-# =============================
-# PERFORMANCE CHART (SAFE)
-# =============================
-def create_performance_chart(player_df, age_group):
-    rows = []
+# =========================
+# PDF Summary
+# =========================
 
-    for metric in sorted(player_df["Metric_Type"].unique()):
-        if metric in lower_is_better:
-            best = player_df.loc[player_df["Metric_Type"] == metric, "Lowest"].min()
-        else:
-            best = player_df.loc[player_df["Metric_Type"] == metric, "Highest"].max()
-
-        goal = targets.get(age_group, {}).get(metric)
-        if goal is not None:
-            rows.append({
-                "Metric": metric,
-                "Best": best,
-                "Goal": goal
-            })
-
-    if not rows:
-        return None
-
-    df_chart = pd.DataFrame(rows)
-
-    fig = px.bar(
-        df_chart,
-        x="Metric",
-        y=["Best", "Goal"],
-        barmode="group",
-        title="Best Performance vs Target"
-    )
-    fig.update_layout(height=350)
-
-    try:
-        img_bytes = fig.to_image(format="png")
-        img = Image.open(BytesIO(img_bytes))
-
-        temp_img = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-        img.save(temp_img.name)
-
-        return temp_img.name
-
-    except Exception as e:
-        # Cloud-safe fallback
-        return None
+CARD_METRICS = [
+    "10 yard sprint",
+    "Pro Agility",
+    "BES Tee",
+    "BES Flip",
+    "Arm Speed Pitch",
+    "Arm Speed Reg"
+]
 
 
-# =============================
-# PLAYER SUMMARY PDF
-# =============================
+def draw_scorecard(c, x, y, w, h, metric, best, goal, status, trend_up):
+    # Card background
+    c.setFillColor(colors.whitesmoke)
+    c.roundRect(x, y, w, h, 10, fill=1)
+
+    # Border
+    c.setStrokeColor(colors.grey)
+    c.roundRect(x, y, w, h, 10, fill=0)
+
+    # Metric title
+    c.setFont("Helvetica-Bold", 11)
+    c.setFillColor(colors.black)
+    c.drawString(x + 10, y + h - 20, metric)
+
+    # Best value
+    c.setFont("Helvetica", 10)
+    c.drawString(x + 10, y + h - 40, f"Best: {best:.2f}")
+
+    # Goal
+    goal_text = f"{goal:.2f}" if goal is not None else "—"
+    c.drawString(x + 10, y + h - 58, f"Goal: {goal_text}")
+
+    # Status
+    status_color = colors.green if status == "Met" else colors.red
+    c.setFillColor(status_color)
+    c.drawString(x + 10, y + h - 76, f"Status: {status}")
+
+    # Trend arrow
+    arrow = "▲ Improving" if trend_up else "▼ Needs Work"
+    arrow_color = colors.green if trend_up else colors.red
+    c.setFillColor(arrow_color)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawRightString(x + w - 10, y + 15, arrow)
+
+
 def create_player_summary_pdf(player_name, player_df, age_group, team):
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     c = canvas.Canvas(temp_file.name, pagesize=LETTER)
@@ -151,61 +149,61 @@ def create_player_summary_pdf(player_name, player_df, age_group, team):
 
     # ---- PLAYER INFO ----
     c.setFont("Helvetica", 12)
+    c.setFillColor(colors.black)
     c.drawString(40, height - 120, f"Player: {player_name}")
     c.drawString(40, height - 140, f"Team: {team}")
     c.drawString(40, height - 160, f"Age Group: {age_group}")
 
-    # ---- CHART (OPTIONAL) ----
-    chart_path = create_performance_chart(player_df, age_group)
+    # ---- SCORECARDS ----
+    card_width = 250
+    card_height = 95
+    start_x = 40
+    start_y = height - 240
+    gap_x = 20
+    gap_y = 20
 
-    if chart_path:
-        c.drawImage(chart_path, 40, height - 430, width=520, height=250)
-        table_y = height - 720
-    else:
-        # No chart available → move table up
-        c.setFont("Helvetica-Oblique", 10)
-        c.setFillColor(colors.grey)
-        c.drawString(40, height - 200, "Chart unavailable in this environment.")
-        table_y = height - 450
+    col = 0
+    row = 0
 
-    # ---- TABLE ----
-    table_data = [["Metric", "Best", "Goal", "Status"]]
+    for metric in CARD_METRICS:
+        mdf = player_df[player_df["Metric_Type"] == metric]
+        if mdf.empty:
+            continue
 
-    for metric in sorted(player_df["Metric_Type"].unique()):
-        mdf = player_df.loc[player_df["Metric_Type"] == metric]
-
+        # First & Best values
         if metric in lower_is_better:
             best = mdf["Lowest"].min()
-            goal = targets.get(age_group, {}).get(metric)
-            status = "Met" if goal and best <= goal else "Needs Work"
+            first = mdf.sort_values("Date")["Lowest"].iloc[0]
+            trend_up = best < first
+            status = "Met" if targets.get(age_group, {}).get(metric) and best <= targets[age_group][metric] else "Needs Work"
         else:
             best = mdf["Highest"].max()
-            goal = targets.get(age_group, {}).get(metric)
-            status = "Met" if goal and best >= goal else "Needs Work"
+            first = mdf.sort_values("Date")["Highest"].iloc[0]
+            trend_up = best > first
+            status = "Met" if targets.get(age_group, {}).get(metric) and best >= targets[age_group][metric] else "Needs Work"
 
-        table_data.append([
-            metric,
-            f"{best:.2f}",
-            f"{goal:.2f}" if goal else "—",
-            status
-        ])
+        goal = targets.get(age_group, {}).get(metric)
 
-    table = Table(table_data, colWidths=[160, 80, 80, 100])
-    table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1f2937")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONT", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
-        ("ALIGN", (1, 1), (-1, -1), "CENTER"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
-    ]))
+        x = start_x + col * (card_width + gap_x)
+        y = start_y - row * (card_height + gap_y)
 
-    for i, row in enumerate(table_data[1:], start=1):
-        color = colors.green if row[3] == "Met" else colors.red
-        table.setStyle([("TEXTCOLOR", (-1, i), (-1, i), color)])
+        draw_scorecard(
+            c,
+            x=x,
+            y=y,
+            w=card_width,
+            h=card_height,
+            metric=metric,
+            best=best,
+            goal=goal,
+            status=status,
+            trend_up=trend_up
+        )
 
-    table.wrapOn(c, width, height)
-    table.drawOn(c, 40, table_y)
+        col += 1
+        if col > 1:
+            col = 0
+            row += 1
 
     # ---- FOOTER ----
     c.setFont("Helvetica-Oblique", 9)
