@@ -99,7 +99,7 @@ CARD_METRICS = [
 ]
 
 
-def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, trend_up):
+def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, growth, trend_up):
     # Card background
     c.setFillColor(colors.whitesmoke)
     c.roundRect(x, y, w, h, 10, fill=1)
