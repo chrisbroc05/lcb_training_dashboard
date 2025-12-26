@@ -85,21 +85,22 @@ def get_age_group(age):
     elif age <= 14: return "14U"
     return "16U"
 
-hitting_thresholds = {
-    "8U":  {"C": 40, "B": 50, "A": 60},
-    "10U": {"C": 50, "B": 60, "A": 70},
-    "12U": {"C": 60, "B": 70, "A": 80},
-    "14U": {"C": 70, "B": 80, "A": 90},
-    "16U": {"C": 80, "B": 90, "A": 95},
-}
-
 # =========================
 # Player Grades
 # =========================
 def get_hitting_grade(player_df, age_group):
-    thresholds = hitting_thresholds.get(age_group)
-    if not thresholds:
+    goals = targets.get(age_group, {})
+    bes_goals = []
+
+    if "BES Tee" in goals:
+        bes_goals.append(goals["BES Tee"])
+    if "BES Flip" in goals:
+        bes_goals.append(goals["BES Flip"])
+
+    if not bes_goals:
         return "—"
+
+    goal = max(bes_goals)
 
     bes_values = []
 
@@ -112,13 +113,14 @@ def get_hitting_grade(player_df, age_group):
     if not bes_values:
         return "—"
 
-    best_bes = max(bes_values)
+    best = max(bes_values)
+    pct = best / goal
 
-    if best_bes >= thresholds["A"]:
+    if pct >= 1.10:
         return "A"
-    elif best_bes >= thresholds["B"]:
+    elif pct >= 1.00:
         return "B"
-    elif best_bes >= thresholds["C"]:
+    elif pct >= 0.90:
         return "C"
     else:
         return "D"
@@ -127,26 +129,35 @@ def get_hitting_grade(player_df, age_group):
 def get_speed_grade(player_df, age_group):
     speed_metrics = ["10 yard sprint", "Pro Agility", "Home to 1B sprint"]
     goals = targets.get(age_group, {})
-    met = 0
+    scores = []
 
     for metric in speed_metrics:
         if metric not in player_df["Metric_Type"].values:
             continue
+        if metric not in goals:
+            continue
 
         mdf = player_df[player_df["Metric_Type"] == metric]
         best = mdf["Lowest"].min()
+        goal = goals[metric]
 
-        if metric in goals and best <= goals[metric]:
-            met += 1
+        pct = goal / best  # lower is better
+        scores.append(pct)
 
-    if met == 3:
+    if not scores:
+        return "—"
+
+    avg_pct = sum(scores) / len(scores)
+
+    if avg_pct >= 1.10:
         return "A"
-    elif met == 2:
+    elif avg_pct >= 1.00:
         return "B"
-    elif met == 1:
+    elif avg_pct >= 0.90:
         return "C"
     else:
         return "D"
+
 
 
 # =========================
@@ -217,7 +228,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(160, height - 55, "LCB Training Performance Summary")
 
     # ---- PLAYER PROFILE BOX ----
-    box_y = height - 250
+    box_y = height - 180
     
     c.setFillColor(colors.whitesmoke)
     c.rect(40, box_y, 520, 80, stroke=0, fill=1)
