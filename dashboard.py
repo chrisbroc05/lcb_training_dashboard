@@ -94,8 +94,6 @@ def get_hitting_grade(player_df, age_group):
 
     if "BES Tee" in goals:
         bes_goals.append(goals["BES Tee"])
-    if "BES Flip" in goals:
-        bes_goals.append(goals["BES Flip"])
 
     if not bes_goals:
         return "—"
@@ -109,11 +107,6 @@ def get_hitting_grade(player_df, age_group):
             player_df[player_df["Metric_Type"] == "BES Tee"]["Highest"].max()
         )
 
-    if "BES Flip" in player_df["Metric_Type"].values:
-        bes_values.append(
-            player_df[player_df["Metric_Type"] == "BES Flip"]["Highest"].max()
-        )
-
     if not bes_values:
         return "—"
 
@@ -122,9 +115,9 @@ def get_hitting_grade(player_df, age_group):
 
     if diff <= 5:
         return "A"
-    elif diff <= 8:
+    elif diff <= 10:
         return "B"
-    elif diff <= 12:
+    elif diff <= 15:
         return "C"
     else:
         return "D"
@@ -160,9 +153,6 @@ def get_speed_grade(player_df, age_group):
         return "C"
     else:
         return "D"
-
-
-
 
 # =========================
 # PDF Summary
