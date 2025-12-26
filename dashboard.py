@@ -163,7 +163,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     card_width = 250
     card_height = 110
     start_x = 40
-    start_y = height - 320
+    start_y = height - 300
     gap_x = 20
     gap_y = 20
 
@@ -214,35 +214,22 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
             col = 0
             row += 1
 
-    # ---- COACH NOTES SECTION ----
-    notes_y = 110  # vertical position above footer
-    box_height = 70
-    
-    # Draw box
-    c.setStrokeColor(colors.HexColor("#1f2937"))
-    c.setLineWidth(1)
-    c.rect(40, notes_y, width - 80, box_height)
-    
-    # Header
-    c.setFont("Helvetica-Bold", 11)
-    c.setFillColor(colors.HexColor("#1f2937"))
-    c.drawString(50, notes_y + box_height - 15, "Coach Broc Notes")
-    
-    # Notes text
-    styles = getSampleStyleSheet()
-    note_style = ParagraphStyle(
-        "CoachNotes",
-        parent=styles["Normal"],
-        fontSize=9,
-        leading=12,
-        textColor=colors.black
-    )
-    
-    notes_text = coach_notes if coach_notes else "—"
-    paragraph = Paragraph(notes_text, note_style)
-    paragraph.wrap(width - 100, box_height - 30)
-    paragraph.drawOn(c, 50, notes_y + 10)
+    # ---- COACH NOTES BOX ----
+    c.setFont("Helvetica-Bold", 12)
+    c.setFillColor(colors.black)
+    c.drawString(40, 200, "Coach Broc Notes:")
 
+    # Draw a box
+    c.setStrokeColor(colors.grey)
+    c.rect(40, 100, 520, 90, stroke=1, fill=0)
+
+    # Add the actual notes inside the box
+    if coach_notes:
+        c.setFont("Helvetica", 10)
+        text_object = c.beginText(45, 185)
+        for line in coach_notes.split("\n"):
+            text_object.textLine(line)
+        c.drawText(text_object)
 
     # ---- FOOTER ----
     c.setFont("Helvetica-Oblique", 9)
@@ -426,12 +413,19 @@ with tab1:
             # ---------------------------
             # PDF GENERATION
             # ---------------------------
+
+            coach_notes = st.text_area(
+                "Coach Broc Notes (optional)",
+                placeholder="Type any tips or observations here..."
+            )
+            
             if st.button("📄 Create Summary Report"):
                 pdf_path = create_player_summary_pdf(
                     selected_player,
                     player_df,
                     age_group,
-                    player_team
+                    player_team,
+                    coach_notes
                 )
 
                 with open(pdf_path, "rb") as f:
