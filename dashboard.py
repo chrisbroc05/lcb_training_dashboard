@@ -115,7 +115,7 @@ def draw_scorecard(c, x, y, w, h, metric, first, best, goal, status, trend_up):
 
     # First value
     c.setFont("Helvetica", 10)
-    c.drawString(x + 10, y + h - 40, f"First: {First:.2f}")
+    c.drawString(x + 10, y + h - 40, f"First: {first:.2f}")
 
     # Best value
     c.setFont("Helvetica", 10)
