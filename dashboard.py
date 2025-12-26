@@ -456,7 +456,7 @@ with tab1:
         summary_df_styled = summary_df.style.format(format_dict)\
             .apply(color_best_row, axis=1)
         
-        st.dataframe(summary_df_styled, use_container_width=True)
+        st.dataframe(summary_df_styled, width="stretch")
         
         # =========================
         # BEST PERFORMANCES TABLE
@@ -474,7 +474,7 @@ with tab1:
         
         st.dataframe(
             best_df.style.format({"Best Score": "{:.2f}"}),
-            use_container_width=True
+            width="stretch"
         )
         
         # =========================
@@ -536,7 +536,7 @@ with tab1:
                     title="Strength Performance (Jan - Jun)"
                 )
                 fig_h1.update_layout(height=350, legend_title_text="Metric")
-                st.plotly_chart(fig_h1, use_container_width=True)
+                st.plotly_chart(fig_h1, width="stretch")
         
             # Second half of year
             df_h2 = df_baseball[df_baseball["Month"] > 6]
@@ -548,7 +548,7 @@ with tab1:
                     title="Strength Performance (Jul - Dec)"
                 )
                 fig_h2.update_layout(height=350, legend_title_text="Metric")
-                st.plotly_chart(fig_h2, use_container_width=True)
+                st.plotly_chart(fig_h2, width="stretch")
 
         
             card_cols = st.columns(4)
@@ -604,7 +604,7 @@ with tab1:
                     title="Speed & Agility Performance (Jan - Jun)"
                 )
                 fig_h1.update_layout(height=350, legend_title_text="Metric")
-                st.plotly_chart(fig_h1, use_container_width=True)
+                st.plotly_chart(fig_h1, width="stretch")
         
             # Second half of year (Jul - Dec)
             df_h2 = df_baseball[df_baseball["Month"] > 6]
@@ -616,7 +616,7 @@ with tab1:
                     title="Speed & Agility Performance (Jul - Dec)"
                 )
                 fig_h2.update_layout(height=350, legend_title_text="Metric")
-                st.plotly_chart(fig_h2, use_container_width=True)
+                st.plotly_chart(fig_h2, width="stretch")
 
         
             card_cols = st.columns(2)
@@ -703,7 +703,7 @@ with tab2:
                     title=f"{selected_team} Strength Performance Over Time"
                 )
                 fig_strength.update_layout(height=350, legend_title_text="Metric")
-                st.plotly_chart(fig_strength, use_container_width=True)
+                st.plotly_chart(fig_strength, width="stretch")
             
             # ---------------------------
             # Team Performance Trends - Speed & Agility
@@ -721,7 +721,7 @@ with tab2:
                     title=f"{selected_team} Speed & Agility Performance Over Time"
                 )
                 fig_speed.update_layout(height=350, legend_title_text="Metric")
-                st.plotly_chart(fig_speed, use_container_width=True)
+                st.plotly_chart(fig_speed, width="stretch")
             
             st.markdown("<hr>", unsafe_allow_html=True)
 
@@ -760,7 +760,7 @@ with tab2:
             
                     st.dataframe(
                         top_players_metric[["Full Name", "Average"]].head(10).style.format({"Average": "{:.2f}"}),
-                        use_container_width=True
+                        width="stretch"
                     )
 
 
@@ -809,7 +809,7 @@ with tab3:
         leaderboard = leaderboard.sort_values("Highest", ascending=False)
 
     # ---- Display top performers ----
-    st.dataframe(leaderboard.head(15), use_container_width=True)
+    st.dataframe(leaderboard.head(15), width="stretch")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
