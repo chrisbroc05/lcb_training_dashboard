@@ -164,13 +164,11 @@ def get_speed_grade(player_df, age_group):
 # Progress Bar
 # =========================
 def draw_progress_bar(c, x, y, width, height, progress, fill_color):
-    """
-    progress: value from 0.0 to 1.0
-    """
     progress = max(0, min(1, progress))
 
     # Outline
-    c.setStrokeColor(colors.grey)
+    c.setStrokeColor(colors.black)
+    c.setLineWidth(0.5)
     c.rect(x, y, width, height, stroke=1, fill=0)
 
     # Fill
@@ -287,30 +285,31 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     spd_grade, sec_to_a = get_speed_grade(player_df, age_group)
     
     start_x = 330
-    start_y = box_y + 55
+    start_y = box_y + 60
     
     c.setFont("Helvetica-Bold", 12)
+    c.setFillColor(colors.black)
     c.drawString(start_x, start_y, "Performance Grades")
     
     # ---- HITTING ----
     c.setFont("Helvetica-Bold", 14)
     c.setFillColor(grade_color(hit_grade))
-    c.drawString(start_x, start_y - 25, f"Hitting: {hit_grade}")
+    c.drawString(start_x, start_y - 20, f"Hitting: {hit_grade}")
     
     c.setFont("Helvetica", 10)
     c.setFillColor(colors.black)
     c.drawString(
         start_x,
-        start_y - 40,
+        start_y - 35,
         f"{mph_to_a} mph to A" if mph_to_a is not None else "—"
     )
     
     draw_progress_bar(
         c,
         start_x,
-        start_y - 55,
+        start_y - 50,
         width=180,
-        height=8,
+        height=10,
         progress=hitting_progress(mph_to_a),
         fill_color=grade_color(hit_grade)
     )
@@ -318,28 +317,25 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     # ---- SPEED ----
     c.setFont("Helvetica-Bold", 14)
     c.setFillColor(grade_color(spd_grade))
-    c.drawString(start_x, start_y - 85, f"Speed & Agility: {spd_grade}")
+    c.drawString(start_x, start_y - 75, f"Speed & Agility: {spd_grade}")
     
     c.setFont("Helvetica", 10)
     c.setFillColor(colors.black)
     c.drawString(
         start_x,
-        start_y - 100,
+        start_y - 90,
         f"{sec_to_a} sec to A" if sec_to_a is not None else "—"
     )
     
     draw_progress_bar(
         c,
         start_x,
-        start_y - 115,
+        start_y - 105,
         width=180,
-        height=8,
+        height=10,
         progress=speed_progress(sec_to_a),
         fill_color=grade_color(spd_grade)
     )
-    
-    
-
 
     # ---- SCORECARDS ----
     card_width = 250
