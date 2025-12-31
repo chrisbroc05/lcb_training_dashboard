@@ -265,8 +265,8 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(160, height - 55, "LCB Training Performance Summary")
 
     # ---- PLAYER PROFILE BOX ----
-    box_y = height - 225   # moved DOWN
-    box_h = 75             # shorter height
+    box_y = height - 205   # moved DOWN
+    box_h = 90             # shorter height
     
     c.setFillColor(colors.whitesmoke)
     c.rect(40, box_y, 520, box_h, stroke=0, fill=1)
@@ -366,7 +366,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     card_width = 250
     card_height = 110
     start_x = 40
-    start_y = height - 360   # moved DOWN to avoid overlap
+    start_y = height - 320   # moved DOWN to avoid overlap
     gap_x = 20
     gap_y = 20
     
