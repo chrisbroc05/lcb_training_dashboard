@@ -12,6 +12,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import Table, TableStyle, Paragraph
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
 import tempfile
 
 # =========================
@@ -266,7 +267,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
 
     # ---- PLAYER PROFILE BOX ----
     box_y = height - 200   # moved DOWN
-    box_h = 95   # shorter height
+    box_h = 90  # shorter height
     
     c.setFillColor(colors.whitesmoke)
     c.rect(40, box_y, 520, box_h, stroke=0, fill=1)
@@ -419,7 +420,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
 
     # ---- COACH NOTES BOX ----
     box_x = 40
-    box_y = 100
+    box_y = 90
     box_width = 520
     box_height = 90
     
@@ -452,29 +453,35 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
                 break
 
     # ---- DISCLAIMER ----
-    c.setFont("Helvetica-Bold", 8)
-    c.setFillColor(colors.grey)
-    c.drawString(40, 85, "Disclaimer:")
-    
     disclaimer_text = (
+        "<b>Disclaimer:</b><br/>"
         "Performance grades and progress indicators are calculated using LCB Training evaluation standards "
-        "based on a combination of program benchmarks and national age-group averages.\n\n"
-        "Grades reflect current performance relative to peers in the same age group. "
-        "Progress bars show the remaining improvement needed to reach an “A” benchmark "
-        "(measured in mph for hitting and seconds for speed metrics).\n\n"
+        "based on program benchmarks and national age-group averages.<br/><br/>"
+        "Grades reflect current performance relative to peers. Progress bars show remaining improvement "
+        "needed to reach an “A” benchmark (mph for hitting, seconds for speed).<br/><br/>"
         "Results may vary based on development, training history, and testing conditions."
     )
     
-    c.setFont("Helvetica", 8)
+    styles = getSampleStyleSheet()
+    disclaimer_style = styles["Normal"]
+    disclaimer_style.fontName = "Helvetica"
+    disclaimer_style.fontSize = 8
+    disclaimer_style.leading = 10
+    disclaimer_style.textColor = colors.grey
+    disclaimer_style.alignment = TA_CENTER
     
-    text_obj = c.beginText()
-    text_obj.setTextOrigin(40, 70)
-    text_obj.setLeading(10)
+    paragraph = Paragraph(disclaimer_text, disclaimer_style)
     
-    for line in disclaimer_text.split("\n"):
-        text_obj.textLine(line)
+    # Set width and auto-calc height
+    max_width = width - 100
+    w, h = paragraph.wrap(max_width, 100)
     
-    c.drawText(text_obj)
+    # Draw centered
+    paragraph.drawOn(
+        c,
+        (width - max_width) / 2,
+        55  # Y-position safely above footer
+    )
 
     
     # ---- FOOTER ----
