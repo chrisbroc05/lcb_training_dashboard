@@ -106,11 +106,11 @@ def get_hitting_grade(player_df, age_group):
     diff = goal - best  # how far from goal
 
     # Grade logic
-    if diff <= 5:
+    if diff <= 8:
         grade = "A"
-    elif diff <= 8:
-        grade = "B"
     elif diff <= 12:
+        grade = "B"
+    elif diff <= 15:
         grade = "C"
     else:
         grade = "D"
@@ -147,11 +147,11 @@ def get_speed_grade(player_df, age_group):
     avg_diff = sum(diffs) / len(diffs)
 
     # Grade logic (seconds from goal)
-    if avg_diff <= 0.05:
+    if avg_diff <= 0.10:
         grade = "A"
-    elif avg_diff <= 0.10:
-        grade = "B"
     elif avg_diff <= 0.15:
+        grade = "B"
+    elif avg_diff <= 0.25:
         grade = "C"
     else:
         grade = "D"
@@ -265,77 +265,99 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(160, height - 55, "LCB Training Performance Summary")
 
     # ---- PLAYER PROFILE BOX ----
-    box_y = height - 180
+    box_y = height - 190
+    box_h = 100
     
     c.setFillColor(colors.whitesmoke)
-    c.rect(40, box_y, 520, 80, stroke=0, fill=1)
+    c.rect(40, box_y, 520, box_h, stroke=0, fill=1)
     
-    # Left: Player Info
-    c.setFont("Helvetica-Bold", 14)
+    # Column X positions
+    left_x = 50
+    mid_x = 230
+    right_x = 370
+    top_y = box_y + box_h - 20
+    line_gap = 18
+    
+    # ======================
+    # LEFT: PLAYER INFO
+    # ======================
+    c.setFont("Helvetica-Bold", 15)
     c.setFillColor(colors.black)
-    c.drawString(50, box_y + 55, player_name)
+    c.drawString(left_x, top_y, player_name)
     
     c.setFont("Helvetica", 11)
-    c.drawString(50, box_y + 35, f"Team: {team}")
-    c.drawString(50, box_y + 20, f"Age Group: {age_group}")
+    c.drawString(left_x, top_y - line_gap, f"Team: {team}")
+    c.drawString(left_x, top_y - 2 * line_gap, f"Age Group: {age_group}")
     
-    # Right: Grades
-    # ---- PERFORMANCE GRADES BOX ----
+    # Divider line
+    c.setStrokeColor(colors.lightgrey)
+    c.line(mid_x - 15, box_y + 10, mid_x - 15, box_y + box_h - 10)
+    
+    # ======================
+    # MIDDLE: GRADES
+    # ======================
     hit_grade, mph_to_a = get_hitting_grade(player_df, age_group)
     spd_grade, sec_to_a = get_speed_grade(player_df, age_group)
     
-    start_x = 330
-    start_y = box_y + 60
-    
     c.setFont("Helvetica-Bold", 12)
     c.setFillColor(colors.black)
-    c.drawString(start_x, start_y, "Performance Grades")
+    c.drawString(mid_x, top_y, "Grades")
     
-    # ---- HITTING ----
+    # Hitting
     c.setFont("Helvetica-Bold", 14)
     c.setFillColor(grade_color(hit_grade))
-    c.drawString(start_x, start_y - 20, f"Hitting: {hit_grade}")
+    c.drawString(mid_x, top_y - line_gap, f"Hitting: {hit_grade}")
     
-    c.setFont("Helvetica", 10)
+    # Speed
+    c.setFillColor(grade_color(spd_grade))
+    c.drawString(mid_x, top_y - 2 * line_gap, f"Speed: {spd_grade}")
+    
+    # Divider line
+    c.setStrokeColor(colors.lightgrey)
+    c.line(right_x - 15, box_y + 10, right_x - 15, box_y + box_h - 10)
+    
+    # ======================
+    # RIGHT: PROGRESS BARS
+    # ======================
+    c.setFont("Helvetica-Bold", 12)
     c.setFillColor(colors.black)
+    c.drawString(right_x, top_y, "Progress to A")
+    
+    # Hitting progress
+    c.setFont("Helvetica", 10)
     c.drawString(
-        start_x,
-        start_y - 35,
-        f"{mph_to_a} mph to A" if mph_to_a is not None else "—"
+        right_x,
+        top_y - line_gap,
+        f"Hitting: {mph_to_a} mph" if mph_to_a is not None else "Hitting: —"
     )
     
     draw_progress_bar(
         c,
-        start_x,
-        start_y - 50,
-        width=180,
-        height=10,
+        right_x,
+        top_y - line_gap - 12,
+        width=130,
+        height=9,
         progress=hitting_progress(mph_to_a),
         fill_color=grade_color(hit_grade)
     )
     
-    # ---- SPEED ----
-    c.setFont("Helvetica-Bold", 14)
-    c.setFillColor(grade_color(spd_grade))
-    c.drawString(start_x, start_y - 75, f"Speed & Agility: {spd_grade}")
-    
-    c.setFont("Helvetica", 10)
-    c.setFillColor(colors.black)
+    # Speed progress
     c.drawString(
-        start_x,
-        start_y - 90,
-        f"{sec_to_a} sec to A" if sec_to_a is not None else "—"
+        right_x,
+        top_y - 2 * line_gap - 12,
+        f"Speed: {sec_to_a} sec" if sec_to_a is not None else "Speed: —"
     )
     
     draw_progress_bar(
         c,
-        start_x,
-        start_y - 105,
-        width=180,
-        height=10,
+        right_x,
+        top_y - 2 * line_gap - 24,
+        width=130,
+        height=9,
         progress=speed_progress(sec_to_a),
         fill_color=grade_color(spd_grade)
     )
+
 
     # ---- SCORECARDS ----
     card_width = 250
