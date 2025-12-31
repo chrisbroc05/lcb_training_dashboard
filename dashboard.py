@@ -329,14 +329,14 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.setFont("Helvetica", 10)
     c.drawString(
         right_x,
-        top_y - grade_offset,
+        top_y - 20,
         f"Hitting: {mph_to_a} mph" if mph_to_a is not None else "Hitting: —"
     )
     
     draw_progress_bar(
         c,
         right_x,
-        top_y - grade_offset - 12,
+        top_y - 20 - 12,
         width=130,
         height=8,
         progress=hitting_progress(mph_to_a),
@@ -346,7 +346,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     # Speed progress
     c.drawString(
         right_x,
-        top_y - grade_offset - line_gap - 12,
+        top_y - 20 - line_gap - 12,
         f"Speed: {sec_to_a} sec" if sec_to_a is not None else "Speed: —"
     )
     
