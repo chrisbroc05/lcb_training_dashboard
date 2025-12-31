@@ -266,7 +266,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(160, height - 55, "LCB Training Performance Summary")
 
     # ---- PLAYER PROFILE BOX ----
-    box_y = height - 200   # moved DOWN
+    box_y = height - 192   # moved DOWN
     box_h = 90  # shorter height
     
     c.setFillColor(colors.whitesmoke)
@@ -420,7 +420,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
 
     # ---- COACH NOTES BOX ----
     box_x = 40
-    box_y = 90
+    box_y = 120
     box_width = 520
     box_height = 90
     
@@ -457,8 +457,6 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
         "<b>Disclaimer:</b><br/>"
         "Performance grades and progress indicators are calculated using LCB Training evaluation standards "
         "based on program benchmarks and national age-group averages.<br/><br/>"
-        "Grades reflect current performance relative to peers. Progress bars show remaining improvement "
-        "needed to reach an “A” benchmark (mph for hitting, seconds for speed).<br/><br/>"
         "Results may vary based on development, training history, and testing conditions."
     )
     
