@@ -265,8 +265,8 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(160, height - 55, "LCB Training Performance Summary")
 
     # ---- PLAYER PROFILE BOX ----
-    box_y = height - 205   # moved DOWN
-    box_h = 90             # shorter height
+    box_y = height - 200   # moved DOWN
+    box_h = 95   # shorter height
     
     c.setFillColor(colors.whitesmoke)
     c.rect(40, box_y, 520, box_h, stroke=0, fill=1)
@@ -366,7 +366,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     card_width = 250
     card_height = 110
     start_x = 40
-    start_y = height - 320   # moved DOWN to avoid overlap
+    start_y = height - 310   # moved DOWN to avoid overlap
     gap_x = 20
     gap_y = 20
     
@@ -451,9 +451,31 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
             if start_y < box_y + 8:  # stop if we reach bottom of box
                 break
 
-
+    # ---- DISCLAIMER ----
+    disclaimer_text = (
+    "Disclaimer:\n"
+    "Performance grades and progress indicators are calculated using LCB Training evaluation standards "
+    "based on a combination of program benchmarks and national age-group averages.\n\n"
+    "Grades reflect current performance relative to peers in the same age group. "
+    "Progress bars show the remaining improvement needed to reach an “A” benchmark "
+    "(measured in mph for hitting and seconds for speed metrics).\n\n"
+    "Results may vary based on development, training history, and testing conditions."
+    )
+    
+    c.setFont("Helvetica", 8)
+    c.setFillColor(colors.grey)
+    
+    text_obj = c.beginText()
+    text_obj.setTextOrigin(40, 70)  # Adjust Y if needed
+    text_obj.setLeading(10)
+    
+    for line in disclaimer_text.split("\n"):
+        text_obj.textLine(line)
+    
+    c.drawText(text_obj)
+    
     # ---- FOOTER ----
-    c.setFont("Helvetica-Oblique", 9)
+    c.setFont("Helvetica-Oblique", 6)
     c.setFillColor(colors.grey)
     c.drawCentredString(
         width / 2,
