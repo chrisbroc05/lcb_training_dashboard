@@ -452,27 +452,30 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
                 break
 
     # ---- DISCLAIMER ----
+    c.setFont("Helvetica-Bold", 8)
+    c.setFillColor(colors.grey)
+    c.drawString(40, 85, "Disclaimer:")
+    
     disclaimer_text = (
-        "Disclaimer:\n"
         "Performance grades and progress indicators are calculated using LCB Training evaluation standards "
         "based on a combination of program benchmarks and national age-group averages.\n\n"
         "Grades reflect current performance relative to peers in the same age group. "
         "Progress bars show the remaining improvement needed to reach an “A” benchmark "
         "(measured in mph for hitting and seconds for speed metrics).\n\n"
         "Results may vary based on development, training history, and testing conditions."
-        )
+    )
     
     c.setFont("Helvetica", 8)
-    c.setFillColor(colors.grey)
     
     text_obj = c.beginText()
-    text_obj.setTextOrigin(40, 70)  # Adjust Y if needed
+    text_obj.setTextOrigin(40, 70)
     text_obj.setLeading(10)
     
     for line in disclaimer_text.split("\n"):
         text_obj.textLine(line)
     
     c.drawText(text_obj)
+
     
     # ---- FOOTER ----
     c.setFont("Helvetica-Oblique", 6)
