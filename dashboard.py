@@ -454,9 +454,8 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
 
     # ---- DISCLAIMER ----
     disclaimer_text = (
-        "<b>Disclaimer:</b><br/>"
         "Performance grades and progress indicators are calculated using LCB Training evaluation standards "
-        "based on program benchmarks and national age-group averages.<br/><br/>"
+        "based on program benchmarks and national age-group averages.\n\n"
         "Results may vary based on development, training history, and testing conditions."
     )
     
@@ -468,18 +467,14 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     disclaimer_style.textColor = colors.grey
     disclaimer_style.alignment = TA_CENTER
     
-    paragraph = Paragraph(disclaimer_text, disclaimer_style)
+    paragraph = Paragraph(disclaimer_text.replace("\n", "<br/>"), disclaimer_style)
     
     # Set width and auto-calc height
-    max_width = width - 100
-    w, h = paragraph.wrap(max_width, 100)
+    max_width = width - 80
+    w, h = paragraph.wrap(max_width, 100)  # wrap(width, maxHeight)
     
-    # Draw centered
-    paragraph.drawOn(
-        c,
-        (width - max_width) / 2,
-        55  # Y-position safely above footer
-    )
+    # Draw centered above footer
+    paragraph.drawOn(c, (width - max_width) / 2, 55)
 
     
     # ---- FOOTER ----
