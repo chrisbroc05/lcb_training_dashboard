@@ -86,7 +86,7 @@ def get_age_group(age):
     return "16U"
 
 # =========================
-# Player Grades
+# Player Hitting Grades
 # =========================
 def get_hitting_grade(player_df, age_group):
     goals = targets.get(age_group, {})
@@ -122,7 +122,14 @@ def get_hitting_grade(player_df, age_group):
     else:
         return "D"
 
+    # mph to A (within 5 mph of goal)
+    mph_to_a = max(0, diff - 5)
 
+    return grade, round(mph_to_a, 1)
+
+# =========================
+# Player Speed Grade
+# =========================
 def get_speed_grade(player_df, age_group):
     speed_metrics = ["10 yard sprint", "Pro Agility", "Home to 1B sprint"]
     goals = targets.get(age_group, {})
@@ -153,6 +160,50 @@ def get_speed_grade(player_df, age_group):
         return "C"
     else:
         return "D"
+
+    # seconds to A
+    sec_to_a = max(0, avg_diff - 0.05)
+
+    return grade, round(sec_to_a, 2)
+
+# =========================
+# Progress Bar
+# =========================
+def draw_progress_bar(c, x, y, width, height, progress, fill_color):
+    """
+    progress: value from 0.0 to 1.0
+    """
+    progress = max(0, min(1, progress))
+
+    # Outline
+    c.setStrokeColor(colors.grey)
+    c.rect(x, y, width, height, stroke=1, fill=0)
+
+    # Fill
+    c.setFillColor(fill_color)
+    c.rect(x, y, width * progress, height, stroke=0, fill=1)
+
+def hitting_progress(mph_to_a):
+    MAX_MPH = 15
+    if mph_to_a is None:
+        return 0
+    return 1 - min(mph_to_a / MAX_MPH, 1)
+
+
+def speed_progress(sec_to_a):
+    MAX_SEC = 0.30
+    if sec_to_a is None:
+        return 0
+    return 1 - min(sec_to_a / MAX_SEC, 1)
+
+def grade_color(grade):
+    return {
+        "A": colors.green,
+        "B": colors.darkgreen,
+        "C": colors.orange,
+        "D": colors.red
+    }.get(grade, colors.black)
+
 
 # =========================
 # PDF Summary
@@ -237,15 +288,63 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(50, box_y + 20, f"Age Group: {age_group}")
     
     # Right: Grades
-    hitting_grade = get_hitting_grade(player_df, age_group)
-    speed_grade = get_speed_grade(player_df, age_group)
+    # ---- PERFORMANCE GRADES BOX ----
+    hit_grade, mph_to_a = get_hitting_grade(player_df, age_group)
+    spd_grade, sec_to_a = get_speed_grade(player_df, age_group)
+    
+    start_x = 330
+    start_y = box_y + 55
     
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(330, box_y + 50, "Performance Grades")
+    c.drawString(start_x, start_y, "Performance Grades")
     
-    c.setFont("Helvetica", 11)
-    c.drawString(330, box_y + 30, f"Hitting:  {hitting_grade}")
-    c.drawString(330, box_y + 15, f"Speed & Agility:  {speed_grade}")
+    # ---- HITTING ----
+    c.setFont("Helvetica-Bold", 14)
+    c.setFillColor(grade_color(hit_grade))
+    c.drawString(start_x, start_y - 25, f"Hitting: {hit_grade}")
+    
+    c.setFont("Helvetica", 10)
+    c.setFillColor(colors.black)
+    c.drawString(
+        start_x,
+        start_y - 40,
+        f"{mph_to_a} mph to A" if mph_to_a is not None else "—"
+    )
+    
+    draw_progress_bar(
+        c,
+        start_x,
+        start_y - 55,
+        width=180,
+        height=8,
+        progress=hitting_progress(mph_to_a),
+        fill_color=grade_color(hit_grade)
+    )
+    
+    # ---- SPEED ----
+    c.setFont("Helvetica-Bold", 14)
+    c.setFillColor(grade_color(spd_grade))
+    c.drawString(start_x, start_y - 85, f"Speed & Agility: {spd_grade}")
+    
+    c.setFont("Helvetica", 10)
+    c.setFillColor(colors.black)
+    c.drawString(
+        start_x,
+        start_y - 100,
+        f"{sec_to_a} sec to A" if sec_to_a is not None else "—"
+    )
+    
+    draw_progress_bar(
+        c,
+        start_x,
+        start_y - 115,
+        width=180,
+        height=8,
+        progress=speed_progress(sec_to_a),
+        fill_color=grade_color(spd_grade)
+    )
+    
+    
 
 
     # ---- SCORECARDS ----
