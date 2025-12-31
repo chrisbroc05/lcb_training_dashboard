@@ -353,7 +353,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     draw_progress_bar(
         c,
         right_x,
-        top_y - grade_offset - line_gap - 24,
+        top_y - 20 - line_gap - 24,
         width=130,
         height=8,
         progress=speed_progress(sec_to_a),
