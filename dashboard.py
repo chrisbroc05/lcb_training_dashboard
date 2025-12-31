@@ -90,40 +90,33 @@ def get_age_group(age):
 # =========================
 def get_hitting_grade(player_df, age_group):
     goals = targets.get(age_group, {})
-    bes_goals = []
 
-    if "BES Tee" in goals:
-        bes_goals.append(goals["BES Tee"])
+    if "BES Tee" not in goals:
+        return "—", None
 
-    if not bes_goals:
-        return "—"
+    goal = goals["BES Tee"]
 
-    goal = max(bes_goals)
+    if "BES Tee" not in player_df["Metric_Type"].values:
+        return "—", None
 
-    bes_values = []
+    best = (
+        player_df[player_df["Metric_Type"] == "BES Tee"]["Highest"].max()
+    )
 
-    if "BES Tee" in player_df["Metric_Type"].values:
-        bes_values.append(
-            player_df[player_df["Metric_Type"] == "BES Tee"]["Highest"].max()
-        )
+    diff = goal - best  # how far from goal
 
-    if not bes_values:
-        return "—"
-
-    best = max(bes_values)
-    diff = goal - best
-
+    # Grade logic
     if diff <= 5:
-        return "A"
-    elif diff <= 10:
-        return "B"
-    elif diff <= 15:
-        return "C"
+        grade = "A"
+    elif diff <= 8:
+        grade = "B"
+    elif diff <= 12:
+        grade = "C"
     else:
-        return "D"
+        grade = "D"
 
-    # mph to A (within 5 mph of goal)
-    mph_to_a = max(0, diff - 5)
+    # mph to A (0 if already an A)
+    mph_to_a = max(0, diff)
 
     return grade, round(mph_to_a, 1)
 
@@ -144,25 +137,26 @@ def get_speed_grade(player_df, age_group):
         best = (
             player_df[player_df["Metric_Type"] == metric]["Lowest"].min()
         )
-        diff = best - goals[metric]
+
+        diff = best - goals[metric]  # positive = slower
         diffs.append(diff)
 
     if not diffs:
-        return "—"
+        return "—", None
 
     avg_diff = sum(diffs) / len(diffs)
 
-    if avg_diff <= 0.10:
-        return "A"
-    elif avg_diff <= 0.20:
-        return "B"
-    elif avg_diff <= 0.30:
-        return "C"
+    # Grade logic (seconds from goal)
+    if avg_diff <= 0.05:
+        grade = "A"
+    elif avg_diff <= 0.10:
+        grade = "B"
+    elif avg_diff <= 0.15:
+        grade = "C"
     else:
-        return "D"
+        grade = "D"
 
-    # seconds to A
-    sec_to_a = max(0, avg_diff - 0.05)
+    sec_to_a = max(0, avg_diff)
 
     return grade, round(sec_to_a, 2)
 
