@@ -265,8 +265,8 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(160, height - 55, "LCB Training Performance Summary")
 
     # ---- PLAYER PROFILE BOX ----
-    box_y = height - 200
-    box_h = 90
+    box_y = height - 225   # moved DOWN
+    box_h = 75             # shorter height
     
     c.setFillColor(colors.whitesmoke)
     c.rect(40, box_y, 520, box_h, stroke=0, fill=1)
@@ -275,23 +275,23 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     left_x = 50
     mid_x = 230
     right_x = 370
-    top_y = box_y + box_h - 20
+    top_y = box_y + box_h - 18
     line_gap = 18
     
     # ======================
     # LEFT: PLAYER INFO
     # ======================
-    c.setFont("Helvetica-Bold", 15)
+    c.setFont("Helvetica-Bold", 14)
     c.setFillColor(colors.black)
     c.drawString(left_x, top_y, player_name)
     
-    c.setFont("Helvetica", 11)
+    c.setFont("Helvetica", 10.5)
     c.drawString(left_x, top_y - line_gap, f"Team: {team}")
     c.drawString(left_x, top_y - 2 * line_gap, f"Age Group: {age_group}")
     
-    # Divider line
+    # Divider
     c.setStrokeColor(colors.lightgrey)
-    c.line(mid_x - 15, box_y + 10, mid_x - 15, box_y + box_h - 10)
+    c.line(mid_x - 15, box_y + 8, mid_x - 15, box_y + box_h - 8)
     
     # ======================
     # MIDDLE: GRADES
@@ -303,18 +303,20 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.setFillColor(colors.black)
     c.drawString(mid_x, top_y, "Grades")
     
+    grade_offset = 26  # extra spacing under "Grades"
+    
     # Hitting
     c.setFont("Helvetica-Bold", 14)
     c.setFillColor(grade_color(hit_grade))
-    c.drawString(mid_x, top_y - line_gap, f"Hitting: {hit_grade}")
+    c.drawString(mid_x, top_y - grade_offset, f"Hitting: {hit_grade}")
     
     # Speed
     c.setFillColor(grade_color(spd_grade))
-    c.drawString(mid_x, top_y - 2 * line_gap, f"Speed: {spd_grade}")
+    c.drawString(mid_x, top_y - grade_offset - line_gap, f"Speed: {spd_grade}")
     
-    # Divider line
+    # Divider
     c.setStrokeColor(colors.lightgrey)
-    c.line(right_x - 15, box_y + 10, right_x - 15, box_y + box_h - 10)
+    c.line(right_x - 15, box_y + 8, right_x - 15, box_y + box_h - 8)
     
     # ======================
     # RIGHT: PROGRESS BARS
@@ -327,47 +329,47 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.setFont("Helvetica", 10)
     c.drawString(
         right_x,
-        top_y - line_gap,
+        top_y - grade_offset,
         f"Hitting: {mph_to_a} mph" if mph_to_a is not None else "Hitting: —"
     )
     
     draw_progress_bar(
         c,
         right_x,
-        top_y - line_gap - 12,
+        top_y - grade_offset - 12,
         width=130,
-        height=9,
+        height=8,
         progress=hitting_progress(mph_to_a),
         fill_color=grade_color(hit_grade)
     )
     
     # Speed progress
-    c.setFont("Helvetica", 10)
     c.drawString(
         right_x,
-        top_y - 2 * line_gap - 12,
+        top_y - grade_offset - line_gap - 12,
         f"Speed: {sec_to_a} sec" if sec_to_a is not None else "Speed: —"
     )
     
     draw_progress_bar(
         c,
         right_x,
-        top_y - 2 * line_gap - 24,
+        top_y - grade_offset - line_gap - 24,
         width=130,
-        height=9,
+        height=8,
         progress=speed_progress(sec_to_a),
         fill_color=grade_color(spd_grade)
     )
-
-
-    # ---- SCORECARDS ----
+    
+    # ======================
+    # SCORECARDS (MOVED DOWN)
+    # ======================
     card_width = 250
     card_height = 110
     start_x = 40
-    start_y = height - 320
+    start_y = height - 360   # moved DOWN to avoid overlap
     gap_x = 20
     gap_y = 20
-
+    
     col = 0
     row = 0
 
