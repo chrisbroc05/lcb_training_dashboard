@@ -265,8 +265,8 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     c.drawString(160, height - 55, "LCB Training Performance Summary")
 
     # ---- PLAYER PROFILE BOX ----
-    box_y = height - 190
-    box_h = 100
+    box_y = height - 200
+    box_h = 90
     
     c.setFillColor(colors.whitesmoke)
     c.rect(40, box_y, 520, box_h, stroke=0, fill=1)
@@ -321,7 +321,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     # ======================
     c.setFont("Helvetica-Bold", 12)
     c.setFillColor(colors.black)
-    c.drawString(right_x, top_y, "Progress to A")
+    c.drawString(right_x, top_y, "Road to A")
     
     # Hitting progress
     c.setFont("Helvetica", 10)
@@ -342,6 +342,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     )
     
     # Speed progress
+    c.setFont("Helvetica", 10)
     c.drawString(
         right_x,
         top_y - 2 * line_gap - 12,
@@ -363,7 +364,7 @@ def create_player_summary_pdf(player_name, player_df, age_group, team, coach_not
     card_width = 250
     card_height = 110
     start_x = 40
-    start_y = height - 300
+    start_y = height - 320
     gap_x = 20
     gap_y = 20
 
